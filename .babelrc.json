@@ -1,0 +1,18 @@
+{
+  "presets": [
+    ["@babel/preset-env",{
+      "targets": {
+        "node": "current"
+      },
+      "spec": true,
+      "modules": false,
+      "useBuiltIns": "usage",
+      "shippedProposals": true
+    }],
+    ["@babel/preset-stage-0", {
+      "useBuiltIns": true
+    }]
+  ],
+  "plugins": [],
+  "ignore": []
+}

@@ -1,0 +1,30 @@
+{
+  "presets": [
+    ["@babel/preset-env",{
+      "targets": {
+        "node": "current"
+      },
+      "spec": true,
+      "modules": false,
+      "useBuiltIns": "usage",
+      "shippedProposals": true
+    }],
+    ["@babel/preset-stage-0", {
+      "useBuiltIns": true
+    }],
+    ["minify",{
+      "replace": false,
+      "removeConsole": false,
+      "removeDebugger": true
+    }]
+  ],
+  "plugins": [],
+  "ignore": [
+    "**/*demo*/*.js*",
+    "**/*demo*/*.ts*",
+    "**/*mock*/*.js*",
+    "**/*mock*/*.ts*",
+    "**/*test*/*.spec.js*",
+    "**/*test*/*.spec.ts*",
+  ]
+}
