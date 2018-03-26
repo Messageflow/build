@@ -1,12 +1,59 @@
 // @ts-check
 
+export declare interface RunDefaultParams {
+  cleanTask: () => Promise<string[]>;
+  lintTask: () => any;
+  copyTask: () => any;
+  tsTask: () => any;
+}
+export declare interface RunWatchParams {
+  srcPath: string;
+  defaultTask: TaskFunction;
+}
+export declare interface RunTypeScriptParams {
+  srcPath: string;
+  distPath: string;
+  ignores: string[];
+  isProd: boolean;
+  tsconfig: string;
+}
+export declare interface RunLintParams {
+  srcPath: string;
+  ignores: string[];
+  tsconfig: string;
+  tslintConfig: string;
+}
+export declare interface RunCopyParams {
+  srcPath: string;
+  distPath: string;
+}
+export declare interface LinterConfigParams {
+  tslintConfig: string;
+  tsconfig: string;
+}
+export declare interface BuilderParams {
+  src?: string;
+  dist?: string;
+  ignores?: string | string[];
+
+  isProd?: boolean;
+  rootPath?: string;
+  babelrc?: string;
+  tsconfig?: string;
+  tslintConfig?: string;
+}
+
+/** Import typings */
+import { FSWatcher } from 'fs';
+import { TaskFunction } from 'undertaker';
+
 /** Import project dependencies */
 import del from 'del';
 import gulp from 'gulp';
-import gulpBabel from 'gulp-babel';
+import gulpBabelMinify from 'gulp-babel-minify';
 import filter from 'gulp-filter';
 import gulpTslint from 'gulp-tslint';
-import ts from 'gulp-typescript';
+import gulpTs from 'gulp-typescript';
 import path from 'path';
 import tslint from 'tslint';
 
@@ -17,11 +64,15 @@ export function filterFileTypes() {
   ], { restore: true });
 }
 
-export function toProdPath(path) {
-  return path.replace(/^(.+)(\.json)$/, '$1.prod$2');
+export function toProdPath(srcPath: string) {
+  return srcPath.replace(/^(.+)(\.json)$/, '$1.prod$2');
 }
 
-export function joinPath(rootPath, srcPath, isProd) {
+export function joinPath(
+  rootPath: string,
+  srcPath: string,
+  isProd: boolean
+) {
   return path.join(
     rootPath,
     isProd
@@ -31,11 +82,9 @@ export function joinPath(rootPath, srcPath, isProd) {
 }
 
 export function linterConfig({
-  rootPath,
-  isProd,
   tslintConfig,
   tsconfig,
-}) {
+}: LinterConfigParams) {
   return gulpTslint({
     configuration: tslintConfig,
     formatter: 'stylish',
@@ -43,93 +92,88 @@ export function linterConfig({
   });
 }
 
-export function runClean(src) {
+export function runClean(srcPath: string) {
   return function clean() {
-    return del([src]);
+    return del(srcPath);
   };
 }
 
 export function runCopy({
-  src,
-  dist,
-}) {
+  srcPath,
+  distPath,
+}: RunCopyParams) {
   return function copy() {
     return gulp.src([
-      `${src}/**/*.*`,
-      `!${src}/**/*.ts*`,
+      `${srcPath}/**/*.*`,
+      `!${srcPath}/**/*.ts*`,
     ], {
       since: gulp.lastRun(copy),
     })
-      .pipe(gulp.dest(dist));
+      .pipe(gulp.dest(distPath));
   };
 }
 
 export function runLint({
-  src,
+  srcPath,
   ignores,
-  rootPath,
-  isProd,
   tsconfig,
   tslintConfig,
-}) {
+}: RunLintParams) {
   return function lint() {
     return gulp.src([
-      `${src}/**/*.ts*`,
+      `${srcPath}/**/*.ts*`,
       '!**/*.d.ts',
       ...ignores.map(n => `!${n}/**/*.ts*`),
     ], {
       since: gulp.lastRun(lint),
     })
       .pipe(linterConfig({
-        rootPath,
-        isProd,
         tsconfig,
         tslintConfig,
       }))
       .pipe(gulpTslint.report());
-  }
+  };
 }
 
-export function runBabel({
-  src,
+export function runTypeScript({
+  srcPath,
+  distPath,
   ignores,
-  tsconfig,
-  rootPath,
-  babelrc,
   isProd,
-  dist,
-}) {
+  tsconfig,
+}: RunTypeScriptParams) {
   return function babel() {
-    const filter = filterFileTypes();
-
-    return gulp.src([
-      `${src}/**/*.ts*`,
+    const filterFn = filterFileTypes();
+    const src = [
+      `${srcPath}/**/*.ts*`,
       '!**/*.d.ts',
       ...ignores.map(n => `!${n}/**/*.ts*`),
-    ], {
-      since: gulp.lastRun(babel),
-    })
-      .pipe(ts.createProject(tsconfig)())
-      .pipe(filter)
-      .pipe(gulpBabel({
-        filename: joinPath(
-          rootPath,
-          babelrc == null ? './.babelrc.json' : babelrc,
-          isProd
-        ),
-      }))
-      .pipe(filter.restore)
-      .pipe(gulp.dest(dist));
+    ];
+
+    return isProd
+    ? gulp.src(src, { since: gulp.lastRun(babel) })
+        .pipe(gulpTs.createProject(tsconfig)())
+        .pipe(filterFn)
+        .pipe(gulpBabelMinify({
+          mangle: { keepFnName: true },
+          removeConsole: false,
+          removeDebugger: true,
+        }))
+        .pipe(filterFn.restore)
+        .pipe(gulp.dest(distPath))
+    : gulp.src(src)
+        .pipe(gulpTs.createProject(tsconfig)())
+        .pipe(gulp.dest(distPath));
   };
 }
 
 export function runWatch({
-  src,
+  srcPath,
   defaultTask,
-}) {
-  return function watch() {
+}: RunWatchParams) {
+  return function watch(): FSWatcher {
     return gulp.watch([
-      `${src}/**/*.*`,
+      `${srcPath}/**/*.*`,
     ], defaultTask);
   };
 }
@@ -138,14 +182,14 @@ export function runDefault({
   cleanTask,
   lintTask,
   copyTask,
-  babelTask,
-}) {
+  tsTask,
+}: RunDefaultParams): TaskFunction {
   return gulp.series(...[
     cleanTask,
     lintTask,
     gulp.parallel(...[
       copyTask,
-      babelTask,
+      tsTask,
     ]),
   ]);
 }
@@ -157,72 +201,63 @@ export function builder({
 
   isProd,
   rootPath,
-  babelrc,
   tsconfig,
   tslintConfig,
-} = {}) {
-  const nSrc = src == null ? 'src' : src;
-  const nDist = dist == null ? 'dist' : dist;
+}: BuilderParams = {} as BuilderParams) {
+  const srcPath = src == null ? 'src' : src;
+  const distPath = dist == null ? 'dist' : dist;
   const nIgnores = ignores == null
     ? ['demo', 'test*'].map(n => `${src}/${n}`)
-    : ignores;
-  const nIsProd = isProd == null
+    : (Array.isArray(ignores) ? ignores : [ignores]);
+  const isProdFlag = isProd == null
     ? process.env.NODE_ENV === 'production'
     : isProd;
   const nRootPath = rootPath == null
     ? '.'
     : rootPath;
-  const nBabelRc = babelrc == null
-    ? './.babelrc.json'
-    : babelrc;
-  const nTsconfig = joinPath(
+  const resolvedTsconfig = joinPath(
     nRootPath,
     tsconfig == null ? './tsconfig.json' : tsconfig,
-    nIsProd
-  );
-  const nTslintConfig = joinPath(
-    nRootPath,
-    tslintConfig == null ? './tslint.json' : tslintConfig,
-    nIsProd
+    isProdFlag
   );
 
-  const clean = runClean(nDist);
+  const clean = runClean(distPath);
   const copy = runCopy({
-    src: nSrc,
-    dist: nDist,
+    srcPath,
+    distPath,
   });
   const lint = runLint({
+    srcPath,
     ignores: nIgnores,
-    isProd: nIsProd,
-    rootPath: nRootPath,
-    src: nSrc,
-    tsconfig: nTsconfig,
-    tslintConfig: nTslintConfig,
+    tsconfig: resolvedTsconfig,
+    tslintConfig: joinPath(
+      nRootPath,
+      tslintConfig == null ? './tslint.json' : tslintConfig,
+      isProdFlag
+    ),
   });
-  const babel = runBabel({
-    babelrc: nBabelRc,
-    dist: nDist,
+  const ts = runTypeScript({
+    srcPath,
+    distPath,
     ignores: nIgnores,
-    isProd: nIsProd,
-    rootPath: nRootPath,
-    src: nSrc,
-    tsconfig: nTsconfig,
+    tsconfig: resolvedTsconfig,
+    isProd: isProdFlag,
   });
   const defaultTask = runDefault({
-    babelTask: babel,
+    tsTask: ts,
     cleanTask: clean,
     copyTask: copy,
     lintTask: lint,
-  })
+  });
 
   return {
     clean,
     copy,
     lint,
-    babel,
+    ts,
     watch: runWatch({
       defaultTask,
-      src: nSrc,
+      srcPath,
     }),
     default: defaultTask,
   };

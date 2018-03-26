@@ -12,8 +12,8 @@ npm-debug.log*
 yarn-error.log*
 
 # folders
-./test*/
-demo*/
+test*/
+dist*/
 node_modules/
 
 # .js files
