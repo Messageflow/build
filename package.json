@@ -24,6 +24,7 @@
     "build": "npm run ts && cross-env NODE_ENV=production gulp && npm run cleanup",
     "check": "npm run lint && npm run nsp",
     "cleanup": "rm -rf gulpfile.js",
+    "demo": "gulp --gulpfile src/demo/build.js",
     "gulp": "npm run ts && gulp && npm run cleanup",
     "lint": "npm run ts && cross-env NODE_ENV=production gulp lint && npm run cleanup",
     "nsp": "nsp check",

@@ -38,7 +38,6 @@ export declare interface BuilderParams {
 
   isProd?: boolean;
   rootPath?: string;
-  babelrc?: string;
   tsconfig?: string;
   tslintConfig?: string;
 }
@@ -55,7 +54,7 @@ import filter from 'gulp-filter';
 import gulpTslint from 'gulp-tslint';
 import gulpTs from 'gulp-typescript';
 import path from 'path';
-import tslint from 'tslint';
+import { Linter } from 'tslint';
 
 export function filterFileTypes() {
   return filter([
@@ -88,7 +87,7 @@ export function linterConfig({
   return gulpTslint({
     configuration: tslintConfig,
     formatter: 'stylish',
-    program: tslint.Linter.createProgram(tsconfig),
+    program: Linter.createProgram(tsconfig),
   });
 }
 
@@ -207,7 +206,7 @@ export function builder({
   const srcPath = src == null ? 'src' : src;
   const distPath = dist == null ? 'dist' : dist;
   const nIgnores = ignores == null
-    ? ['demo', 'test*'].map(n => `${src}/${n}`)
+    ? ['**/demo*', '**/test*'].map(n => `${src}/${n}`)
     : (Array.isArray(ignores) ? ignores : [ignores]);
   const isProdFlag = isProd == null
     ? process.env.NODE_ENV === 'production'

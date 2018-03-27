@@ -12,7 +12,7 @@ import tslint, { Linter } from 'tslint';
 /** Setting up */
 const srcPath = 'src';
 const distPath = '.';
-const ignores = ['demo', 'test*'];
+const ignores = ['**/demo*', '**/test*'];
 const isProd = process.env.NODE_ENV === 'production';
 const tslintConfig = `./tslint${isProd ? '.prod' : ''}.json`;
 const tsconfig = './tsconfig.json';
@@ -54,9 +54,10 @@ gulp.task('ts', function babel() {
   return isProd
     ? gulp.src(src, { since: gulp.lastRun(babel) })
         .pipe(gulpTs.createProject(tsconfig)())
-        .pipe(filterFn)
+        .pipe(filterFn as any)
         .pipe(gulpBabelMinify({
           mangle: { keepFnName: true },
+          deadcode: { keepFnName: true },
           removeConsole: false,
           removeDebugger: true,
         }))
