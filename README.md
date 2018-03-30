@@ -91,13 +91,13 @@ gulp.task('default', build.default);
 
 ### BuilderParams
 
-- `src` - Optional source directory. Defaults to `src`.
-- `dist` - Optional destination directory. Defaults to `dist`.
-- `ignores` - Optional glob patterns to ignore files/ directories. Defaults to `[demo*, test*]`.
-- `isProd` - Optional production flage. Set to `true` if the build process is meant for production. Defaults to `process.env.NODE_ENV === 'production'`.
-- `rootPath` - Optional path to current working directory. Defaults to `.`.
-- `tsConfig` - Optional path to `tsconfig.json`. Defaults to `./tsconfig.json`.
-- `tslintConfig` - Optional path to `tslint.json`. Defaults to `./tslint.json`.
+- `src` <[string][string-mdn-url]> Optional source directory. Defaults to `src`.
+- `dist` <[string][string-mdn-url]> Optional destination directory. Defaults to `dist`.
+- `ignores` <[string][string-mdn-url]|[string][string-mdn-url][]> Optional glob patterns to ignore files/ directories. Defaults to `[demo*, test*]`.
+- `isProd` <[boolean][boolean-mdn-url]> Optional production flage. Set to `true` if the build process is meant for production. Defaults to `process.env.NODE_ENV === 'production'`.
+- `rootPath` <[string][string-mdn-url]> Optional path to current working directory. Defaults to `.`.
+- `tsConfig` <[string][string-mdn-url]> Optional path to `tsconfig.json`. Defaults to `./tsconfig.json`.
+- `tslintConfig` <[string][string-mdn-url]> Optional path to `tslint.json`. Defaults to `./tslint.json`.
 
 ___
 
