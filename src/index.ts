@@ -56,13 +56,6 @@ import gulpTs from 'gulp-typescript';
 import path from 'path';
 import { Linter } from 'tslint';
 
-export function filterFileTypes() {
-  return filter([
-    '**',
-    '!**/*.d.ts',
-  ], { restore: true });
-}
-
 export function toProdPath(srcPath: string) {
   return srcPath.replace(/^(.+)(\.json)$/, '$1.prod$2');
 }
@@ -142,7 +135,10 @@ export function runTypeScript({
   tsconfig,
 }: RunTypeScriptParams) {
   return function babel() {
-    const filterFn = filterFileTypes();
+    const filterFn = filter([
+      '**',
+      '!**/*.d.ts',
+    ], { restore: true });
     const src = [
       `${srcPath}/**/*.ts*`,
       '!**/*.d.ts',
