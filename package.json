@@ -1,10 +1,13 @@
 {
   "name": "@messageflow/build",
   "version": "0.0.0",
-  "private": true,
   "description": "Quick build with Gulp",
   "keywords": [
     "@messageflow/build",
+    "build",
+    "build-tool",
+    "builder",
+    "gulp",
     "node",
     "typescript"
   ],
