@@ -1,4 +1,22 @@
 {
+  "globals": {
+    "ts-jest": {
+      "useBabelrc": "false",
+      "babelConfig": {
+        "presets": [
+          ["env", {
+            "targets": {
+              "node": "current"
+            },
+            "spec": true,
+            "modules": false,
+            "useBuiltIns": "usage",
+            "shippedProposals": true
+          }]
+        ]
+      }
+    }
+  },
   "testEnvironment": "node",
   "collectCoverage": true,
   "coverageDirectory": "./coverage",
