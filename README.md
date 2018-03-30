@@ -105,24 +105,28 @@ This methods works the same as `greeting(name)` except that this is the synchron
 [mit-license-badge]: https://img.shields.io/github/license/mashape/apistatus.svg?style=flat-square
 [coc-badge]: https://img.shields.io/badge/code%20of-conduct-ff69b4.svg?style=flat-square
 
-[travis-badge]: https://img.shields.io/travis/Messageflow/@messageflow/build.svg?style=flat-square
-[daviddm-badge]: https://img.shields.io/david/Messageflow/@messageflow/build.svg?style=flat-square
-[nsp-badge]: https://nodesecurity.io/orgs/Messageflow/projects/a1c57ec8-9c17-4912-932b-f1ff6284e2ae/badge?style=flat-square
+[travis-badge]: https://img.shields.io/travis/Messageflow/build.svg?style=flat-square
+[daviddm-badge]: https://img.shields.io/david/Messageflow/build.svg?style=flat-square
+[nsp-badge]: https://nodesecurity.io/orgs/messageflow/projects/4650ee88-a5b8-4474-bff4-7d55d8b2c51f/badge?style=flat-square
+[codecov-badge]: https://codecov.io/gh/Messageflow/build/branch/master/graph/badge.svg?style=flat-square
+[coveralls-badge]: https://coveralls.io/repos/github/Messageflow/build/badge.svg?branch=master&style=flat-square
 
-[codebeat-badge]: https://codebeat.co/badges/e486e791-12b7-4198-b834-0fa5bd04e1c3?style=flat-square
-[codacy-badge]: https://api.codacy.com/project/badge/Grade/a70d1556b4e74711a162c4fd4dbb68a1?style=flat-square
+[codebeat-badge]: https://codebeat.co/badges/ca230cdd-bdc5-4f9e-bd39-7b62d47f5fef?style=flat-square
+[codacy-badge]: https://api.codacy.com/project/badge/Grade/ef8c3a98c9e649d19a67ae78f980748a?style=flat-square
 
 <!-- Links -->
 [nodei-url]: https://nodei.co/npm/@messageflow/build
 
 [version-url]: https://www.npmjs.com/package/@messageflow/build
 [downloads-url]: http://www.npmtrends.com/@messageflow/build
-[mit-license-url]: https://github.com/Messageflow/@messageflow/build/blob/master/LICENSE
-[coc-url]: https://github.com/Messageflow/@messageflow/build/blob/master/CODE_OF_CONDUCT.md
+[mit-license-url]: https://github.com/Messageflow/build/blob/master/LICENSE
+[coc-url]: https://github.com/Messageflow/build/blob/master/CODE_OF_CONDUCT.md
 
-[travis-url]: https://travis-ci.org/Messageflow/@messageflow/build
-[daviddm-url]: https://david-dm.org/Messageflow/@messageflow/build
-[nsp-url]: https://nodesecurity.io/orgs/Messageflow/projects/a1c57ec8-9c17-4912-932b-f1ff6284e2ae
+[travis-url]: https://travis-ci.org/Messageflow/build
+[daviddm-url]: https://david-dm.org/Messageflow/build
+[nsp-url]: https://nodesecurity.io/orgs/messageflow/projects/4650ee88-a5b8-4474-bff4-7d55d8b2c51f
+[codecov-url]: https://codecov.io/gh/Messageflow/build
+[coveralls-url]: https://coveralls.io/github/Messageflow/build?branch=master
 
-[codebeat-url]: https://codebeat.co/projects/github-com-Messageflow-@messageflow/build-master
-[codacy-url]: https://www.codacy.com/app/Messageflow/@messageflow/build?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Messageflow/@messageflow/build&amp;utm_campaign=Badge_Grade
+[codebeat-url]: https://codebeat.co/projects/github-com-messageflow-build-master
+[codacy-url]: https://www.codacy.com/app/motss/build?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Messageflow/build&amp;utm_campaign=Badge_Grade
