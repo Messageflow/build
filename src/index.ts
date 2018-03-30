@@ -150,19 +150,19 @@ export function runTypeScript({
     ];
 
     return isProd
-    ? gulp.src(src, { since: gulp.lastRun(babel) })
-        .pipe(gulpTs.createProject(tsconfig)())
-        .pipe(filterFn)
-        .pipe(gulpBabelMinify({
-          mangle: { keepFnName: true },
-          removeConsole: false,
-          removeDebugger: true,
-        }))
-        .pipe(filterFn.restore)
-        .pipe(gulp.dest(distPath))
-    : gulp.src(src)
-        .pipe(gulpTs.createProject(tsconfig)())
-        .pipe(gulp.dest(distPath));
+      ? gulp.src(src, { since: gulp.lastRun(babel) })
+          .pipe(gulpTs.createProject(tsconfig)())
+          .pipe(filterFn)
+          .pipe(gulpBabelMinify({
+            mangle: { keepFnName: true },
+            removeConsole: false,
+            removeDebugger: true,
+          }))
+          .pipe(filterFn.restore)
+          .pipe(gulp.dest(distPath))
+      : gulp.src(src)
+          .pipe(gulpTs.createProject(tsconfig)())
+          .pipe(gulp.dest(distPath));
   };
 }
 
@@ -206,7 +206,7 @@ export function builder({
   const srcPath = src == null ? 'src' : src;
   const distPath = dist == null ? 'dist' : dist;
   const nIgnores = ignores == null
-    ? ['**/demo*', '**/test*'].map(n => `${src}/${n}`)
+    ? ['demo*', 'test*']
     : (Array.isArray(ignores) ? ignores : [ignores]);
   const isProdFlag = isProd == null
     ? process.env.NODE_ENV === 'production'
