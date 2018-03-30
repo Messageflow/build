@@ -16,23 +16,25 @@
 [![Build Status][travis-badge]][travis-url]
 [![Dependency Status][daviddm-badge]][daviddm-url]
 [![NSP Status][nsp-badge]][nsp-url]
+[![Codecov][codecov-badge]][codecov-url]
+[![Coverage Status][coveralls-badge]][coveralls-url]
 
 [![codebeat-badge]][codebeat-url]
 [![codacy-badge]][codacy-url]
 
-> Better greeting message
+> Better build process with [Gulp][gulp-url] for general [Node.js][nodejs-url] projects written in [TypeScript][typescript-url].
 
 ## Table of contents
 
-- [Pre-requisite](#pre-requisite)
+- [Pre-requisites](#pre-requisites)
 - [Setup](#setup)
   - [Install](#install)
   - [Usage](#usage)
     - [Node.js](#nodejs)
     - [Native ES modules or TypeScript](#native-es-modules-or-typescript)
 - [API Reference](#api-reference)
-  - [greeting(name)](#greetingname)
-  - [greetingSync(name)](#greetingsyncname)
+  - [BuilderParams](#builderparams)
+  - [builder([options])](#builderoptions)
 - [License](#license)
 
 ## Pre-requisites
@@ -54,7 +56,17 @@ $ npm install --save @messageflow/build
 #### Node.js
 
 ```js
-const greeting = require('@messageflow/build');
+const gulp = require('gulp');
+const { builder } = require('@messageflow/build');
+
+const build = builder();
+
+gulp.task('clean', build.clean);
+gulp.task('lint', build.lint);
+gulp.task('copy', build.copy);
+gulp.task('ts', build.ts);
+gulp.task('watch', build.watch);
+gulp.task('default', build.default);
 ```
 
 #### Native ES modules or TypeScript
@@ -62,19 +74,44 @@ const greeting = require('@messageflow/build');
 ```ts
 // @ts-check
 
-import greeting from '@messageflow/build';
+import gulp from 'gulp';
+import { builder } from '@messageflow/build';
+
+const build = builder();
+
+gulp.task('clean', build.clean);
+gulp.task('lint', build.lint);
+gulp.task('copy', build.copy);
+gulp.task('ts', build.ts);
+gulp.task('watch', build.watch);
+gulp.task('default', build.default);
 ```
 
 ## API Reference
 
-### greeting(name)
+### BuilderParams
 
-- `name` <[string][string-mdn-url]> Name of the person to greet at.
-- returns: <[Promise][promise-mdn-url]&lt;[string][string-mdn-url]&gt;> Promise which resolves with a greeting message.
+- `src` - Optional source directory. Defaults to `src`.
+- `dist` - Optional destination directory. Defaults to `dist`.
+- `ignores` - Optional glob patterns to ignore files/ directories. Defaults to `[demo*, test*]`.
+- `isProd` - Optional production flage. Set to `true` if the build process is meant for production. Defaults to `process.env.NODE_ENV === 'production'`.
+- `rootPath` - Optional path to current working directory. Defaults to `.`.
+- `tsConfig` - Optional path to `tsconfig.json`. Defaults to `./tsconfig.json`.
+- `tslintConfig` - Optional path to `tslint.json`. Defaults to `./tslint.json`.
 
-### greetingSync(name)
+___
 
-This methods works the same as `greeting(name)` except that this is the synchronous version.
+### builder([options])
+
+- `options` <[BuilderParams][builderparams-url]> Optional configuration for the build process.
+- returns: <[Object][object-mdn-url]> An object of build tasks to be assigned as [Gulp][gulp-url] task, e.g. `gulp.task('<TASK_NAME>', <GULP_TASK_FUNCTION>)`. It comprises of a list of tasks fo a common build process with Gulp for most of the projects:
+
+  1. `clean` - Always remove old files from previous build.
+  2. `lint` - Always lint all `.ts` files with given `tslint.json`.
+  3. `ts` - Compile all `.ts` files with given `tsconfig.json`.
+  4. `copy` - Copy all asset files such as `images`, `json`, `md`, etc.
+  5. `watch` - Run the build process by watching for flle changes.
+  6. `default` - Default build process that comprises all the above.
 
 ## License
 
@@ -85,6 +122,7 @@ This methods works the same as `greeting(name)` except that this is the synchron
 [node-js-url]: https://nodejs.org
 [npm-url]: https://www.npmjs.com
 [node-releases-url]: https://nodejs.org/en/download/releases
+[gulp-url]: https://github.com/gulpjs/gulp
 
 [array-mdn-url]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array
 [boolean-mdn-url]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean
@@ -96,6 +134,8 @@ This methods works the same as `greeting(name)` except that this is the synchron
 [regexp-mdn-url]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp
 [set-mdn-url]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set
 [string-mdn-url]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String
+
+[builderparams-url]: #builderparams
 
 <!-- Badges -->
 [nodei-badge]: https://nodei.co/npm/@messageflow/build.png?downloads=true&downloadRank=true&stars=true
