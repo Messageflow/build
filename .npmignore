@@ -1,32 +1,12 @@
-# dot files
-.build/
-.DS_Store
-.esm-cache
-.jestrc.json
-.nyc_output
-.tmp/
-.travis.yml
-.vscode
-*.env
-**/.git
+# Ignore everything
+**/*.*
+.git/
 
-# debug
-npm-debug.log*
-yarn-error.log*
-
-# folders
-coverage*/
-dist*/
-node_modules/
-src*/
-test*/
-
-# other files
-clean-dir.sh
-gulpfile*.js*
-gulpfile*.ts*
-tsconfig*.json
-tslint*.json
-
-# Do not ignore
+# Except these
 !**/json.d.ts
+!**/package.json
+!LICENSE
+!README.md
+!.npmrc
+!*.js
+!*.d.ts
