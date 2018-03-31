@@ -2,13 +2,13 @@
 .build/
 .DS_Store
 .esm-cache
-.git
 .jestrc.json
 .nyc_output
 .tmp/
 .travis.yml
 .vscode
 *.env
+**/.git
 
 # debug
 npm-debug.log*
