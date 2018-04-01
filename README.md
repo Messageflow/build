@@ -60,6 +60,16 @@ const gulp = require('gulp');
 const { builder } = require('@messageflow/build');
 
 const build = builder();
+/** `cleanGlobs` can be helpful when the destination directory is not the `dist` directory. */
+// const build = builder({
+//   dist: '.',
+//   cleanGlobs: [
+//     './*.js',
+//     './*.d.ts',
+//     '!./gulpfile.js',
+//     '!./json.d.ts',
+//   ],
+// });
 
 gulp.task('clean', build.clean);
 gulp.task('lint', build.lint);
@@ -78,6 +88,16 @@ import gulp from 'gulp';
 import { builder } from '@messageflow/build';
 
 const build = builder();
+/** `cleanGlobs` can be helpful when the destination directory is not the `dist` directory. */
+// const build = builder({
+//   dist: '.',
+//   cleanGlobs: [
+//     './*.js',
+//     './*.d.ts',
+//     '!./gulpfile.js',
+//     '!./json.d.ts',
+//   ],
+// });
 
 gulp.task('clean', build.clean);
 gulp.task('lint', build.lint);
@@ -94,6 +114,7 @@ gulp.task('default', build.default);
 - `src` <[string][string-mdn-url]> Optional source directory. Defaults to `src`.
 - `dist` <[string][string-mdn-url]> Optional destination directory. Defaults to `dist`.
 - `ignores` <[string][string-mdn-url]|[string][string-mdn-url][]> Optional glob patterns to ignore files/ directories. Defaults to `[demo*, test*]`.
+- `cleanGlobs` <[string][string-mdn-url]|[string][string-mdn-url][]> Optional glob patterns to clean files/ directories up before every build process initiates. ***This is required only when the destination directory is not the `dist` directory.*** Defaults to the value of `dist` if unspecified.
 - `isProd` <[boolean][boolean-mdn-url]> Optional production flage. Set to `true` if the build process is meant for production. Defaults to `process.env.NODE_ENV === 'production'`.
 - `rootPath` <[string][string-mdn-url]> Optional path to current working directory. Defaults to `.`.
 - `tsConfig` <[string][string-mdn-url]> Optional path to `tsconfig.json`. Defaults to `./tsconfig.json`.
