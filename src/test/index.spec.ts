@@ -4,13 +4,12 @@
 import del from 'del';
 import gulp from 'gulp';
 import gulpTslint from 'gulp-tslint';
-import gulpTs from 'gulp-typescript';
+import gulpTs, { createProject } from 'gulp-typescript';
 import { Linter } from 'tslint';
 
 /** Import other modules */
 import {
   builder,
-  joinPath,
   linterConfig,
   runClean,
   runCopy,
@@ -259,8 +258,8 @@ describe('@messageflow/build', () => {
       expect(gulp.src).toHaveBeenLastCalledWith([
         `${src}/**/*.ts*`,
         '!**/*.d.ts',
-        '!demo*/**/*.ts*',
-        '!test*/**/*.ts*',
+        '!**/demo*/**/*.ts*',
+        '!**/test*/**/*.ts*',
       ], { since: 'gulp.lastRun' });
       expect(allBuilders)
         .toEqual(
@@ -280,7 +279,7 @@ describe('@messageflow/build', () => {
         );
     });
 
-    test('[function builder] works with ignores string', () => {
+    test('[function builder] works with opts[ignores] string', () => {
       const d = builder({
         ignores: 'demo*',
       });
@@ -301,7 +300,7 @@ describe('@messageflow/build', () => {
       });
     });
 
-    test('[function builder] works with ignores array', () => {
+    test('[function builder] works with opts[ignores] array', () => {
       const d = builder({
         ignores: ['demo*', 'test*'],
       });
@@ -352,8 +351,8 @@ describe('@messageflow/build', () => {
       expect(gulp.src).toHaveBeenCalledWith([
         'src/**/*.ts*',
         '!**/*.d.ts',
-        '!demo*/**/*.ts*',
-        '!test*/**/*.ts*',
+        '!**/demo*/**/*.ts*',
+        '!**/test*/**/*.ts*',
       ], { since: 'gulp.lastRun' });
       expect(d).toEqual({
         clean: expect.any(Function),
@@ -365,13 +364,44 @@ describe('@messageflow/build', () => {
       });
     });
 
-    test('[function toProdPath] works', () => {
-      expect(toProdPath('./babelrc.json')).toEqual('./babelrc.prod.json');
+    test('[function builder] works with defined opts[cleanGlobs]', () => {
+      const d = builder({
+        cleanGlobs: ['./*.js', './*.d.ts', '!./gulpfile.js', '!./json.d.ts'],
+      });
+
+      expect(gulp.src).toHaveBeenCalledTimes(3);
+      expect(del).toHaveBeenCalledTimes(1);
+      expect(gulp.src).toHaveBeenCalledWith([
+        'src/**/*.ts*',
+        '!**/*.d.ts',
+        '!**/demo*/**/*.ts*',
+        '!**/test*/**/*.ts*',
+      ], { since: 'gulp.lastRun' });
+      expect(del).toHaveBeenCalledWith([
+        './*.js',
+        './*.d.ts',
+        '!./gulpfile.js',
+        '!./json.d.ts',
+      ]);
+      expect(d).toEqual({
+        clean: expect.any(Function),
+        copy: expect.any(Function),
+        lint: expect.any(Function),
+        ts: expect.any(Function),
+        watch: expect.any(Function),
+        default: expect.any(Array),
+      });
     });
 
-    test('[function joinPath] works', () => {
-      expect(joinPath('.', 'src', false)).toEqual('src');
-      expect(joinPath('.', 'babelrc.json', true)).toEqual('babelrc.prod.json');
+    test('[function builder] works with opts[isProd]=true', () => {
+      builder({ isProd: true });
+
+      expect(createProject).toHaveBeenCalledTimes(1);
+      expect(createProject).toHaveBeenCalledWith('./tsconfig.json');
+    });
+
+    test('[function toProdPath] works', () => {
+      expect(toProdPath('./babelrc.json')).toEqual('./babelrc.prod.json');
     });
 
   });

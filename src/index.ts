@@ -8,7 +8,7 @@ export declare interface RunDefaultParams {
 }
 export declare interface RunWatchParams {
   srcPath: string;
-  defaultTask: TaskFunction;
+  defaultTask: () => void; /** TaskFunction from 'undertaker' */
 }
 export declare interface RunTypeScriptParams {
   srcPath: string;
@@ -35,16 +35,13 @@ export declare interface BuilderParams {
   src?: string;
   dist?: string;
   ignores?: string | string[];
+  cleanGlobs?: string | string[];
 
   isProd?: boolean;
   rootPath?: string;
   tsconfig?: string;
   tslintConfig?: string;
 }
-
-/** Import typings */
-import { FSWatcher } from 'fs';
-import { TaskFunction } from 'undertaker';
 
 /** Import project dependencies */
 import del from 'del';
@@ -60,19 +57,6 @@ export function toProdPath(srcPath: string) {
   return srcPath.replace(/^(.+)(\.json)$/, '$1.prod$2');
 }
 
-export function joinPath(
-  rootPath: string,
-  srcPath: string,
-  isProd: boolean
-) {
-  return path.join(
-    rootPath,
-    isProd
-      ? toProdPath(srcPath)
-      : srcPath
-  );
-}
-
 export function linterConfig({
   tslintConfig,
   tsconfig,
@@ -84,7 +68,7 @@ export function linterConfig({
   });
 }
 
-export function runClean(srcPath: string) {
+export function runClean(srcPath: string | string[]) {
   return function clean() {
     return del(srcPath);
   };
@@ -134,7 +118,7 @@ export function runTypeScript({
   isProd,
   tsconfig,
 }: RunTypeScriptParams) {
-  return function babel() {
+  return function ts() {
     const filterFn = filter([
       '**',
       '!**/*.d.ts',
@@ -146,7 +130,7 @@ export function runTypeScript({
     ];
 
     return isProd
-      ? gulp.src(src, { since: gulp.lastRun(babel) })
+      ? gulp.src(src, { since: gulp.lastRun(ts) })
           .pipe(gulpTs.createProject(tsconfig)())
           .pipe(filterFn)
           .pipe(gulpBabelMinify({
@@ -166,7 +150,7 @@ export function runWatch({
   srcPath,
   defaultTask,
 }: RunWatchParams) {
-  return function watch(): FSWatcher {
+  return function watch() {
     return gulp.watch([
       `${srcPath}/**/*.*`,
     ], defaultTask);
@@ -178,7 +162,7 @@ export function runDefault({
   lintTask,
   copyTask,
   tsTask,
-}: RunDefaultParams): TaskFunction {
+}: RunDefaultParams) {
   return gulp.series(...[
     cleanTask,
     lintTask,
@@ -193,6 +177,7 @@ export function builder({
   src,
   dist,
   ignores,
+  cleanGlobs,
 
   isProd,
   rootPath,
@@ -202,21 +187,14 @@ export function builder({
   const srcPath = src == null ? 'src' : src;
   const distPath = dist == null ? 'dist' : dist;
   const nIgnores = ignores == null
-    ? ['demo*', 'test*']
+    ? ['**/demo*', '**/test*']
     : (Array.isArray(ignores) ? ignores : [ignores]);
-  const isProdFlag = isProd == null
-    ? process.env.NODE_ENV === 'production'
-    : isProd;
-  const nRootPath = rootPath == null
-    ? '.'
-    : rootPath;
-  const resolvedTsconfig = joinPath(
-    nRootPath,
-    tsconfig == null ? './tsconfig.json' : tsconfig,
-    isProdFlag
-  );
+  const isProdFlag = isProd == null ? process.env.NODE_ENV === 'production' : isProd;
+  const nRootPath = rootPath == null ? '.' : rootPath;
+  const resolvedTsconfig = tsconfig == null ? './tsconfig.json' : tsconfig;
+  const resolvedTslintConfig = tslintConfig == null ? './tslint.json' : tslintConfig;
 
-  const clean = runClean(distPath);
+  const clean = runClean(cleanGlobs == null ? distPath : cleanGlobs);
   const copy = runCopy({
     srcPath,
     distPath,
@@ -225,10 +203,9 @@ export function builder({
     srcPath,
     ignores: nIgnores,
     tsconfig: resolvedTsconfig,
-    tslintConfig: joinPath(
+    tslintConfig: path.join(
       nRootPath,
-      tslintConfig == null ? './tslint.json' : tslintConfig,
-      isProdFlag
+      isProdFlag ? toProdPath(resolvedTslintConfig) : resolvedTslintConfig
     ),
   });
   const ts = runTypeScript({
