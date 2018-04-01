@@ -117,6 +117,7 @@ gulp.task('default', build.default);
 - `cleanGlobs` <[string][string-mdn-url]|[string][string-mdn-url][]> Optional glob patterns to clean files/ directories up before every build process initiates. ***This is required only when the destination directory is not the `dist` directory.*** Defaults to the value of `dist` if unspecified.
 - `isProd` <[boolean][boolean-mdn-url]> Optional production flage. Set to `true` if the build process is meant for production. Defaults to `process.env.NODE_ENV === 'production'`.
 - `rootPath` <[string][string-mdn-url]> Optional path to current working directory. Defaults to `.`.
+- `babelConfig` <[Object][object-mdn-url]> Optional configuration for [Babel][babel-url]. ***This is only needed when `isProd` is set to true.***
 - `tsConfig` <[string][string-mdn-url]> Optional path to `tsconfig.json`. Defaults to `./tsconfig.json`.
 - `tslintConfig` <[string][string-mdn-url]> Optional path to `tslint.json`. Defaults to `./tslint.json`.
 
@@ -144,6 +145,7 @@ ___
 [npm-url]: https://www.npmjs.com
 [node-releases-url]: https://nodejs.org/en/download/releases
 [gulp-url]: https://github.com/gulpjs/gulp
+[babel-url]: https://github.com/babel/babel
 
 [array-mdn-url]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array
 [boolean-mdn-url]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean

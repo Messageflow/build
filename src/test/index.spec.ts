@@ -3,6 +3,7 @@
 /** Import project dependencies */
 import del from 'del';
 import gulp from 'gulp';
+import gulpBabel from 'gulp-babel';
 import gulpTslint from 'gulp-tslint';
 import gulpTs, { createProject } from 'gulp-typescript';
 import { Linter } from 'tslint';
@@ -27,6 +28,7 @@ import {
  */
 jest.mock('del');
 jest.mock('gulp');
+jest.mock('gulp-babel');
 jest.mock('gulp-tslint');
 jest.mock('gulp-typescript');
 jest.mock('tslint');
@@ -62,6 +64,12 @@ describe('@messageflow/build', () => {
     (gulp as any).parallel = jest.fn((...tks) => {
       return tks.map(tk => tk());
     });
+
+    (gulpBabel as any).mockImplementation(() => jest.fn(() => {
+      return {
+        pipe: pipeFn,
+      };
+    }));
 
     (gulpTslint as any).mockImplementation(() => jest.fn(() => {
       return {
@@ -398,6 +406,21 @@ describe('@messageflow/build', () => {
 
       expect(createProject).toHaveBeenCalledTimes(1);
       expect(createProject).toHaveBeenCalledWith('./tsconfig.json');
+    });
+
+    test('[function builder] works with defined opts[babelConfig]', () => {
+      const babelConfig = {
+        preset: [
+          ['@babel/preset-env', {
+            target: { node: 'current' },
+          }],
+        ],
+      };
+
+      builder({ babelConfig, isProd: true });
+
+      expect(gulpBabel).toHaveBeenCalledTimes(1);
+      expect(gulpBabel).toHaveBeenCalledWith(babelConfig);
     });
 
     test('[function toProdPath] works', () => {

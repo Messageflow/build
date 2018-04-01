@@ -22,4 +22,10 @@ export async function writeRemapped(content) {
   return writeTo(distFilePath, content);
 }
 
+export async function testObjectRestSpread(content) {
+  return {
+    ...content,
+  };
+}
+
 export default remapJson;

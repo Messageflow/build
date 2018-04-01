@@ -15,6 +15,7 @@ export declare interface RunTypeScriptParams {
   distPath: string;
   ignores: string[];
   isProd: boolean;
+  babelConfig?: any;
   tsconfig: string;
 }
 export declare interface RunLintParams {
@@ -39,6 +40,7 @@ export declare interface BuilderParams {
 
   isProd?: boolean;
   rootPath?: string;
+  babelConfig?: any;
   tsconfig?: string;
   tslintConfig?: string;
 }
@@ -46,7 +48,7 @@ export declare interface BuilderParams {
 /** Import project dependencies */
 import del from 'del';
 import gulp from 'gulp';
-import gulpBabelMinify from 'gulp-babel-minify';
+import gulpBabel from 'gulp-babel';
 import filter from 'gulp-filter';
 import gulpTslint from 'gulp-tslint';
 import gulpTs from 'gulp-typescript';
@@ -116,6 +118,7 @@ export function runTypeScript({
   distPath,
   ignores,
   isProd,
+  babelConfig,
   tsconfig,
 }: RunTypeScriptParams) {
   return function ts() {
@@ -133,11 +136,27 @@ export function runTypeScript({
       ? gulp.src(src, { since: gulp.lastRun(ts) })
           .pipe(gulpTs.createProject(tsconfig)())
           .pipe(filterFn)
-          .pipe(gulpBabelMinify({
-            mangle: { keepFnName: true },
-            removeConsole: false,
-            removeDebugger: true,
-          }))
+          .pipe(gulpBabel(
+            babelConfig == null
+              ? {
+                presets: [
+                  ['@babel/preset-env', {
+                    targets: { node: 'current' },
+                    spec: true,
+                    modules: false,
+                    useBuiltIns: 'usage',
+                    shippedProposals: true,
+                  }],
+                  ['minify', {
+                    replace: false,
+                    mangle: { keepFnName: true },
+                    removeConsole: false,
+                    removeDebugger: true,
+                  }],
+                ],
+              }
+              : babelConfig
+          ))
           .pipe(filterFn.restore)
           .pipe(gulp.dest(distPath))
       : gulp.src(src)
@@ -181,6 +200,7 @@ export function builder({
 
   isProd,
   rootPath,
+  babelConfig,
   tsconfig,
   tslintConfig,
 }: BuilderParams = {} as BuilderParams) {
@@ -211,6 +231,7 @@ export function builder({
   const ts = runTypeScript({
     srcPath,
     distPath,
+    babelConfig,
     ignores: nIgnores,
     tsconfig: resolvedTsconfig,
     isProd: isProdFlag,
