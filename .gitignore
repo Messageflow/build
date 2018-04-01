@@ -24,3 +24,4 @@ gulpfile*.js
 
 # Do not ignore
 !**/json.d.ts
+!src/demo/**/*.js
