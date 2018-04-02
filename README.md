@@ -22,7 +22,7 @@
 [![codebeat-badge]][codebeat-url]
 [![codacy-badge]][codacy-url]
 
-> Better build process with [Gulp][gulp-url] for general [Node.js][nodejs-url] projects written in [TypeScript][typescript-url].
+> Better build process with [Gulp][gulp-url] for general [Node.js][node-js-url] projects written in [TypeScript][typescript-url].
 
 ## Table of contents
 
