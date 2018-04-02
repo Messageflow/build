@@ -55,6 +55,24 @@ import gulpTs from 'gulp-typescript';
 import path from 'path';
 import { Linter } from 'tslint';
 
+export const DEFAULT_BABEL_CONFIG = {
+  presets: [
+    ['@babel/preset-env', {
+      targets: { node: 'current' },
+      spec: true,
+      modules: false,
+      useBuiltIns: 'usage',
+      shippedProposals: true,
+    }],
+    ['minify', {
+      replace: false,
+      mangle: { keepFnName: true },
+      removeConsole: false,
+      removeDebugger: true,
+    }],
+  ],
+};
+
 export function toProdPath(srcPath: string) {
   return srcPath.replace(/^(.+)(\.json)$/, '$1.prod$2');
 }
@@ -138,23 +156,7 @@ export function runTypeScript({
           .pipe(filterFn)
           .pipe(gulpBabel(
             babelConfig == null
-              ? {
-                presets: [
-                  ['@babel/preset-env', {
-                    targets: { node: 'current' },
-                    spec: true,
-                    modules: false,
-                    useBuiltIns: 'usage',
-                    shippedProposals: true,
-                  }],
-                  ['minify', {
-                    replace: false,
-                    mangle: { keepFnName: true },
-                    removeConsole: false,
-                    removeDebugger: true,
-                  }],
-                ],
-              }
+              ? DEFAULT_BABEL_CONFIG
               : babelConfig
           ))
           .pipe(filterFn.restore)
