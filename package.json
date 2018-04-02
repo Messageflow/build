@@ -24,16 +24,14 @@
     "url": "git@github.com:Messageflow/build.git"
   },
   "scripts": {
-    "build": "npm run ts && cross-env NODE_ENV=production gulp && npm run cleanup",
+    "build": "cross-env NODE_ENV=production gulp",
     "check": "npm run lint && npm run nsp",
-    "cleanup": "rm -rf gulpfile.js",
-    "demo": "gulp --gulpfile src/demo/gulpfile.js ts",
-    "gulp": "npm run ts && gulp && npm run cleanup",
-    "lint": "npm run ts && cross-env NODE_ENV=production gulp lint && npm run cleanup",
+    "demo": "gulp --gulpfile src/demo/gulpfile.js",
+    "gulp": "gulp",
+    "lint": "cross-env NODE_ENV=production gulp lint",
     "nsp": "nsp check",
     "prepublishOnly": "npm run check && npm run build",
-    "test": "jest --config ./.jestrc.json",
-    "ts": "tsc --target esnext --lib esnext,esnext.array,esnext.asynciterable --esModuleInterop --allowSyntheticDefaultImports --module commonjs gulpfile.ts"
+    "test": "jest --config ./.jestrc.json"
   },
   "dependencies": {
     "@babel/core": "^7.0.0-beta.42",

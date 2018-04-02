@@ -84,6 +84,7 @@ export function runCopy({
     return gulp.src([
       `${srcPath}/**/*.*`,
       `!${srcPath}/**/*.ts*`,
+      `${srcPath}/**/*.d.ts`,
     ], {
       since: gulp.lastRun(copy),
     })
@@ -128,7 +129,6 @@ export function runTypeScript({
     ], { restore: true });
     const src = [
       `${srcPath}/**/*.ts*`,
-      '!**/*.d.ts',
       ...ignores.map(n => `!${n}/**/*.ts*`),
     ];
 
