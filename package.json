@@ -1,6 +1,6 @@
 {
   "name": "@messageflow/build",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "Quick build with Gulp",
   "keywords": [
     "@messageflow/build",
