@@ -112,6 +112,7 @@ describe('@messageflow/build', () => {
       expect(gulp.src).toHaveBeenCalledWith([
         `${srcPath}/**/*.*`,
         `!${srcPath}/**/*.ts*`,
+        `${srcPath}/**/*.d.ts`,
       ], { since: 'gulp.lastRun' });
       expect(gulp.dest).toHaveBeenCalledWith(distPath);
     });
@@ -166,7 +167,6 @@ describe('@messageflow/build', () => {
       expect(gulp.dest).toHaveBeenCalledTimes(1);
       expect(gulp.src).toHaveBeenCalledWith([
         `${srcPath}/**/*.ts*`,
-        '!**/*.d.ts',
         '!demo*/**/*.ts*',
         '!test*/**/*.ts*',
       ]);
