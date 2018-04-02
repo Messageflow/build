@@ -8,4 +8,5 @@
 !/*.js
 
 # But but these
+**/demo/**/*.d.ts
 gulpfile.js
