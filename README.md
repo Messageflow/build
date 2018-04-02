@@ -137,7 +137,7 @@ ___
 
 ## License
 
-[MIT License](https://Messageflow.mit-license.org/) © Rong Sen Ng
+[MIT License](https://motss.mit-license.org/) © Rong Sen Ng
 
 <!-- References -->
 [typescript-url]: https://github.com/Microsoft/TypeScript
