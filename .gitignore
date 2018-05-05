@@ -20,8 +20,8 @@ node_modules/
 *.js
 *.jsx
 *.d.ts*
-gulpfile*.js
 
 # Do not ignore
 !**/json.d.ts
+!gulpfile*.js
 !src/demo/**/*.js

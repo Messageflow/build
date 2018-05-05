@@ -1,13 +1,13 @@
 // @ts-check
 
 /** Import project dependencies */
-import del from 'del';
-import gulp from 'gulp';
-import gulpBabelMinify from 'gulp-babel-minify';
-import gulpFilter from 'gulp-filter';
-import gulpTslint from 'gulp-tslint';
-import gulpTs from 'gulp-typescript';
-import tslint, { Linter } from 'tslint';
+const del = require('del');
+const gulp = require('gulp');
+const gulpBabel = require('gulp-babel');
+const gulpFilter = require('gulp-filter');
+const gulpTslint = require('gulp-tslint').default;
+const gulpTs = require('gulp-typescript');
+const { Linter } = require('tslint');
 
 /** Setting up */
 const srcPath = 'src';
@@ -21,6 +21,7 @@ gulp.task('clean', () => {
   return del([
     '*.js',
     '*.d.ts',
+    '!gulpfile.js',
   ]);
 });
 
@@ -54,12 +55,28 @@ gulp.task('ts', function babel() {
   return isProd
     ? gulp.src(src, { since: gulp.lastRun(babel) })
         .pipe(gulpTs.createProject(tsconfig)())
-        .pipe(filterFn as any)
-        .pipe(gulpBabelMinify({
-          mangle: { keepFnName: true },
-          deadcode: { keepFnName: true },
-          removeConsole: false,
-          removeDebugger: true,
+        .pipe(filterFn)
+        // @ts-ignore
+        .pipe(gulpBabel({
+          presets: [
+            ['@babel/preset-env', {
+              targets: { node: 'current' },
+              spec: true,
+              modules: false,
+              useBuiltIns: 'usage',
+              shippedProposals: true,
+            }],
+            ...(
+              isProd
+                ? ['minify', {
+                  mangle: { keepFnName: true },
+                  deadcode: { keepFnName: true },
+                  removeConsole: false,
+                  removeDebugger: true,
+                }]
+                : []
+            ),
+          ],
         }))
         .pipe(filterFn.restore)
         .pipe(gulp.dest(distPath))
