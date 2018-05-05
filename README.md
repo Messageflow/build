@@ -31,9 +31,10 @@
 - [Setup](#setup)
   - [Install](#install)
   - [Usage](#usage)
-    - [Node.js](#nodejs)
-    - [Native ES modules or TypeScript](#native-es-modules-or-typescript)
+    - [gulpfile.js](#gulpfilejs)
 - [API Reference](#api-reference)
+  - [DEFAULT_IGNORES](#default_ignores)
+  - [DEFAULT_BABEL_CONFIG](#default_babel_config)
   - [BuilderParams](#builderparams)
   - [builder([options])](#builderoptions)
 - [License](#license)
@@ -48,13 +49,13 @@
 ### Install
 
 ```sh
-# Install via NPM
-$ npm install --save @messageflow/build
+# Install via NPM as one of the `devDependencies`
+$ npm install --save-dev @messageflow/build
 ```
 
 ### Usage
 
-#### Node.js
+#### gulpfile.js
 
 ```js
 const gulp = require('gulp');
@@ -80,53 +81,57 @@ gulp.task('watch', build.watch);
 gulp.task('default', build.default);
 ```
 
-#### Native ES modules or TypeScript
+## API Reference
 
-```ts
-// @ts-check
+### DEFAULT_IGNORES
 
-import gulp from 'gulp';
-import { builder } from '@messageflow/build';
-
-const build = builder();
-/** `cleanGlobs` can be helpful when the destination directory is not the `dist` directory. */
-// const build = builder({
-//   dist: '.',
-//   cleanGlobs: [
-//     './*.js',
-//     './*.d.ts',
-//     '!./gulpfile.js',
-//     '!./json.d.ts',
-//   ],
-// });
-
-gulp.task('clean', build.clean);
-gulp.task('lint', build.lint);
-gulp.task('copy', build.copy);
-gulp.task('ts', build.ts);
-gulp.task('watch', build.watch);
-gulp.task('default', build.default);
+```js
+[
+  '**/demo*',
+  '**/test*',
+]
 ```
 
-## API Reference
+### DEFAULT_BABEL_CONFIG
+
+```js
+{
+  presets: [
+    ['@babel/preset-env', {
+      targets: { node: 'current' },
+      spec: true,
+      modules: false,
+      useBuiltIns: 'usage',
+      shippedProposals: true,
+    }],
+    ['minify', {
+      replace: false,
+      mangle: { keepFnName: true },
+      removeConsole: false,
+      removeDebugger: true,
+    }],
+  ],
+}
+```
 
 ### BuilderParams
 
-- `src` <[string][string-mdn-url]> Optional source directory. Defaults to `src`.
-- `dist` <[string][string-mdn-url]> Optional destination directory. Defaults to `dist`.
-- `ignores` <[string][string-mdn-url]|[string][string-mdn-url][]> Optional glob patterns to ignore files/ directories. Defaults to `[demo*, test*]`.
-- `cleanGlobs` <[string][string-mdn-url]|[string][string-mdn-url][]> Optional glob patterns to clean files/ directories up before every build process initiates. ***This is required only when the destination directory is not the `dist` directory.*** Defaults to the value of `dist` if unspecified.
-- `isProd` <[boolean][boolean-mdn-url]> Optional production flage. Set to `true` if the build process is meant for production. Defaults to `process.env.NODE_ENV === 'production'`.
-- `rootPath` <[string][string-mdn-url]> Optional path to current working directory. Defaults to `.`.
-- `babelConfig` <[Object][object-mdn-url]> Optional configuration for [Babel][babel-url]. ***This is only needed when `isProd` is set to true.***
-- `tsConfig` <[string][string-mdn-url]> Optional path to `tsconfig.json`. Defaults to `./tsconfig.json`.
-- `tslintConfig` <[string][string-mdn-url]> Optional path to `tslint.json`. Defaults to `./tslint.json`.
+- `src` <[?string][string-mdn-url]> Optional source directory. Defaults to `src`.
+- `dist` <[?string][string-mdn-url]> Optional destination directory. Defaults to `dist`.
+- `ignores` <[?string][string-mdn-url]|[string][string-mdn-url][]> Optional glob patterns to ignore files/ directories. Defaults to [DEFAULT_IGNORES][default-ignores-url].
+- `copies` <[?string][string-mdn-url]|[string][string-mdn-url][]> Optional glob patterns to copy files/ directories to destination build directory. Defaults to `['<SRC>/**/*.*', '!<SRC>/**/*.ts*', '<SRC>/**/*.d.ts']`.
+- `cleanGlobs` <[?string][string-mdn-url]|[string][string-mdn-url][]> Optional glob patterns to clean files/ directories up before every build process initiates. ***This is required only when the destination directory is not the `dist` directory.*** Defaults to the value of `dist` if unspecified.
+- `isProd` <[?boolean][boolean-mdn-url]> Optional production flage. Set to `true` if the build process is meant for production. Defaults to `process.env.NODE_ENV === 'production'`.
+- `rootPath` <[?string][string-mdn-url]> Optional path to current working directory. Defaults to `.`.
+- `babelConfig` <[?Object][object-mdn-url]> Optional configuration for [Babel][babel-url]. ***This is only needed when `isProd` is set to true.*** Defaults to [DEFAULT_BABEL_CONFIG][default-babel-config-url].
+- `tsConfig` <[?string][string-mdn-url]> Optional path to `tsconfig.json`. Defaults to `./tsconfig.json`.
+- `tslintConfig` <[?string][string-mdn-url]> Optional path to `tslint.json`. Defaults to `./tslint.json`.
 
 ___
 
 ### builder([options])
 
-- `options` <[BuilderParams][builderparams-url]> Optional configuration for the build process.
+- `options` <[?BuilderParams][builderparams-url]> Optional configuration for the build process.
 - returns: <[Object][object-mdn-url]> An object of build tasks to be assigned as [Gulp][gulp-url] task, e.g. `gulp.task('<TASK_NAME>', <GULP_TASK_FUNCTION>)`. It comprises of a list of tasks fo a common build process with Gulp for most of the projects:
 
   1. `clean` - Always remove old files from previous build.
@@ -148,6 +153,10 @@ ___
 [gulp-url]: https://github.com/gulpjs/gulp
 [babel-url]: https://github.com/babel/babel
 
+[builderparams-url]: #builderparams
+[default-ignores-url]: #default_ignores
+[default-babel-config-url]: #default_babel_config
+
 [array-mdn-url]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array
 [boolean-mdn-url]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean
 [function-mdn-url]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Function
@@ -158,8 +167,6 @@ ___
 [regexp-mdn-url]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/RegExp
 [set-mdn-url]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Set
 [string-mdn-url]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/String
-
-[builderparams-url]: #builderparams
 
 <!-- Badges -->
 [nodei-badge]: https://nodei.co/npm/@messageflow/build.png?downloads=true&downloadRank=true&stars=true

@@ -25,7 +25,7 @@ export declare interface RunLintParams {
   tslintConfig: string;
 }
 export declare interface RunCopyParams {
-  srcPath: string;
+  copyPaths: string[];
   distPath: string;
 }
 export declare interface LinterConfigParams {
@@ -36,6 +36,7 @@ export declare interface BuilderParams {
   src?: string;
   dist?: string;
   ignores?: string | string[];
+  copies?: string | string[];
   cleanGlobs?: string | string[];
 
   isProd?: boolean;
@@ -55,6 +56,10 @@ import gulpTs from 'gulp-typescript';
 import path from 'path';
 import { Linter } from 'tslint';
 
+export const DEFAULT_IGNORES = [
+  '**/demo*',
+  '**/test*',
+];
 export const DEFAULT_BABEL_CONFIG = {
   presets: [
     ['@babel/preset-env', {
@@ -95,15 +100,11 @@ export function runClean(srcPath: string | string[]) {
 }
 
 export function runCopy({
-  srcPath,
+  copyPaths,
   distPath,
 }: RunCopyParams) {
   return function copy() {
-    return gulp.src([
-      `${srcPath}/**/*.*`,
-      `!${srcPath}/**/*.ts*`,
-      `${srcPath}/**/*.d.ts`,
-    ], {
+    return gulp.src(copyPaths, {
       since: gulp.lastRun(copy),
     })
       .pipe(gulp.dest(distPath));
@@ -120,7 +121,11 @@ export function runLint({
     return gulp.src([
       `${srcPath}/**/*.ts*`,
       '!**/*.d.ts',
-      ...ignores.map(n => `!${n}/**/*.ts*`),
+      ...(
+        Array.isArray(ignores) && ignores.length > 0
+          ? ignores.map(n => `!${n}/**/*.ts*`)
+          : []
+      ),
     ], {
       since: gulp.lastRun(lint),
     })
@@ -198,6 +203,7 @@ export function builder({
   src,
   dist,
   ignores,
+  copies,
   cleanGlobs,
 
   isProd,
@@ -209,7 +215,7 @@ export function builder({
   const srcPath = src == null ? 'src' : src;
   const distPath = dist == null ? 'dist' : dist;
   const nIgnores = ignores == null
-    ? ['**/demo*', '**/test*']
+    ? DEFAULT_IGNORES
     : (Array.isArray(ignores) ? ignores : [ignores]);
   const isProdFlag = isProd == null ? process.env.NODE_ENV === 'production' : isProd;
   const nRootPath = rootPath == null ? '.' : rootPath;
@@ -218,12 +224,18 @@ export function builder({
 
   const clean = runClean(cleanGlobs == null ? distPath : cleanGlobs);
   const copy = runCopy({
-    srcPath,
     distPath,
+    copyPaths: copies == null
+      ? [
+        `${srcPath}/**/*.*`,
+        `!${srcPath}/**/*.ts*`,
+        `${srcPath}/**/*.d.ts`,
+      ]
+      : (Array.isArray(copies) ? copies : [copies]),
   });
   const lint = runLint({
     srcPath,
-    ignores: nIgnores,
+    ignores: isProd ? nIgnores : [],
     tsconfig: resolvedTsconfig,
     tslintConfig: path.join(
       nRootPath,
@@ -234,7 +246,7 @@ export function builder({
     srcPath,
     distPath,
     babelConfig,
-    ignores: nIgnores,
+    ignores: isProd ? nIgnores : [],
     tsconfig: resolvedTsconfig,
     isProd: isProdFlag,
   });
