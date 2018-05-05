@@ -18,6 +18,11 @@
     "email": "wes.ngrongsen@gmail.com",
     "url": "https://github.com/motss"
   },
+  "files": [
+    "index.d.ts",
+    "index.js",
+    "index.mjs"
+  ],
   "main": "./index.js",
   "repository": {
     "type": "git",
