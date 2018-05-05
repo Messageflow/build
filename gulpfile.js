@@ -68,12 +68,12 @@ gulp.task('ts', function compile() {
             }],
             ...(
               isProd
-                ? ['minify', {
+                ? [['minify', {
                   mangle: { keepFnName: true },
                   deadcode: { keepFnName: true },
                   removeConsole: false,
                   removeDebugger: true,
-                }]
+                }]]
                 : []
             ),
           ],
