@@ -41,7 +41,7 @@ gulp.task('lint', function lint() {
     .pipe(gulpTslint.report());
 });
 
-gulp.task('ts', function babel() {
+gulp.task('ts', function compile() {
   const filterFn = gulpFilter([
     '**',
     '!**/*.d.ts',
@@ -53,7 +53,7 @@ gulp.task('ts', function babel() {
   ];
 
   return isProd
-    ? gulp.src(src, { since: gulp.lastRun(babel) })
+    ? gulp.src(src, { since: gulp.lastRun(compile) })
         .pipe(gulpTs.createProject(tsconfig)())
         .pipe(filterFn)
         // @ts-ignore

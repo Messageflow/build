@@ -5,8 +5,8 @@
   "keywords": [
     "@messageflow/build",
     "babel",
-    "build-tool",
     "build",
+    "build-tool",
     "builder",
     "compile",
     "copy",
