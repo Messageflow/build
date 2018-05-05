@@ -14,6 +14,7 @@
 [![Code of Conduct][coc-badge]][coc-url]
 
 [![Build Status][travis-badge]][travis-url]
+[![CircleCI][circleci-badge]][circleci-url]
 [![Dependency Status][daviddm-badge]][daviddm-url]
 [![NSP Status][nsp-badge]][nsp-url]
 [![Codecov][codecov-badge]][codecov-url]
@@ -169,6 +170,7 @@ ___
 [coc-badge]: https://img.shields.io/badge/code%20of-conduct-ff69b4.svg?style=flat-square
 
 [travis-badge]: https://img.shields.io/travis/Messageflow/build.svg?style=flat-square
+[circleci-badge]: https://circleci.com/gh/Messageflow/build/tree/master.svg?style=svg
 [daviddm-badge]: https://img.shields.io/david/Messageflow/build.svg?style=flat-square
 [nsp-badge]: https://nodesecurity.io/orgs/messageflow/projects/4650ee88-a5b8-4474-bff4-7d55d8b2c51f/badge?style=flat-square
 [codecov-badge]: https://codecov.io/gh/Messageflow/build/branch/master/graph/badge.svg?style=flat-square
@@ -186,6 +188,7 @@ ___
 [coc-url]: https://github.com/Messageflow/build/blob/master/CODE_OF_CONDUCT.md
 
 [travis-url]: https://travis-ci.org/Messageflow/build
+[circleci-url]: https://circleci.com/gh/Messageflow/build/tree/master
 [daviddm-url]: https://david-dm.org/Messageflow/build
 [nsp-url]: https://nodesecurity.io/orgs/messageflow/projects/4650ee88-a5b8-4474-bff4-7d55d8b2c51f
 [codecov-url]: https://codecov.io/gh/Messageflow/build
