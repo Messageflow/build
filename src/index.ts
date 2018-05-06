@@ -25,7 +25,7 @@ export declare interface RunLintParams {
   tslintConfig: string;
 }
 export declare interface RunCopyParams {
-  copyPaths: string[];
+  copyPaths: string | string[];
   distPath: string;
 }
 export declare interface LinterConfigParams {
@@ -199,24 +199,32 @@ export function runDefault({
   ]);
 }
 
-export function builder({
-  src,
-  dist,
-  ignores,
-  copies,
-  cleanGlobs,
+export function builder(options = {} as BuilderParams) {
+  const {
+    src,
+    dist,
+    ignores,
+    copies,
+    cleanGlobs,
 
-  isProd,
-  rootPath,
-  babelConfig,
-  tsconfig,
-  tslintConfig,
-}: BuilderParams = {} as BuilderParams) {
+    isProd,
+    rootPath,
+    babelConfig,
+    tsconfig,
+    tslintConfig,
+  } = options || {} as BuilderParams;
   const srcPath = src == null ? 'src' : src;
   const distPath = dist == null ? 'dist' : dist;
   const nIgnores = ignores == null
     ? DEFAULT_IGNORES
     : (Array.isArray(ignores) ? ignores : [ignores]);
+  const copyPaths = copies == null
+    ? [
+      `${srcPath}/**/*.*`,
+      `!${srcPath}/**/*.ts*`,
+      `${srcPath}/**/*.d.ts`,
+    ]
+    : copies;
   const isProdFlag = isProd == null ? process.env.NODE_ENV === 'production' : isProd;
   const nRootPath = rootPath == null ? '.' : rootPath;
   const resolvedTsconfig = tsconfig == null ? './tsconfig.json' : tsconfig;
@@ -224,14 +232,8 @@ export function builder({
 
   const clean = runClean(cleanGlobs == null ? distPath : cleanGlobs);
   const copy = runCopy({
+    copyPaths,
     distPath,
-    copyPaths: copies == null
-      ? [
-        `${srcPath}/**/*.*`,
-        `!${srcPath}/**/*.ts*`,
-        `${srcPath}/**/*.d.ts`,
-      ]
-      : (Array.isArray(copies) ? copies : [copies]),
   });
   const lint = runLint({
     srcPath,

@@ -118,14 +118,14 @@ gulp.task('default', build.default);
 
 - `src` <[?string][string-mdn-url]> Optional source directory. Defaults to `src`.
 - `dist` <[?string][string-mdn-url]> Optional destination directory. Defaults to `dist`.
-- `ignores` <[?string][string-mdn-url]|[string][string-mdn-url][]> Optional glob patterns to ignore files/ directories. Defaults to [DEFAULT_IGNORES][default-ignores-url].
+- `ignores` <[?string][string-mdn-url]|[string][string-mdn-url][]> Optional glob patterns to ignore files/ directories. Defaults to [DEFAULT_IGNORES][default-ignores-url]. **_This only works when `isProd` is set to true._**
 - `copies` <[?string][string-mdn-url]|[string][string-mdn-url][]> Optional glob patterns to copy files/ directories to destination build directory. Defaults to `['<SRC>/**/*.*', '!<SRC>/**/*.ts*', '<SRC>/**/*.d.ts']`.
-- `cleanGlobs` <[?string][string-mdn-url]|[string][string-mdn-url][]> Optional glob patterns to clean files/ directories up before every build process initiates. ***This is required only when the destination directory is not the `dist` directory.*** Defaults to the value of `dist` if unspecified.
+- `cleanGlobs` <[?string][string-mdn-url]|[string][string-mdn-url][]> Optional glob patterns to clean files/ directories up before every build process initiates. **_This is required only when the destination directory is not the `dist` directory._** Defaults to the value of `dist` if unspecified.
 - `isProd` <[?boolean][boolean-mdn-url]> Optional production flage. Set to `true` if the build process is meant for production. Defaults to `process.env.NODE_ENV === 'production'`.
 - `rootPath` <[?string][string-mdn-url]> Optional path to current working directory. Defaults to `.`.
-- `babelConfig` <[?Object][object-mdn-url]> Optional configuration for [Babel][babel-url]. ***This is only needed when `isProd` is set to true.*** Defaults to [DEFAULT_BABEL_CONFIG][default-babel-config-url].
+- `babelConfig` <[?Object][object-mdn-url]> Optional configuration for [Babel][babel-url]. **_This is only needed when `isProd` is set to true._** Defaults to [DEFAULT_BABEL_CONFIG][default-babel-config-url].
 - `tsConfig` <[?string][string-mdn-url]> Optional path to `tsconfig.json`. Defaults to `./tsconfig.json`.
-- `tslintConfig` <[?string][string-mdn-url]> Optional path to `tslint.json`. Defaults to `./tslint.json`.
+- `tslintConfig` <[?string][string-mdn-url]> Optional path to `tslint.json`. Defaults to `./tslint.json`. **_This defaults to `./tslint.prod.json` when `isProd` is set to true._**
 
 ___
 

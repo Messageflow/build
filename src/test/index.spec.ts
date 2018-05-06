@@ -103,9 +103,14 @@ describe('@messageflow/build', () => {
 
     test('[function runCopy] works', () => {
       const srcPath = 'src';
+      const copyPaths = [
+        `${srcPath}/**/*.*`,
+        `!${srcPath}/**/*.ts*`,
+        `${srcPath}/**/*.d.ts`,
+      ];
       const distPath = 'dist';
 
-      runCopy({ srcPath, distPath })();
+      runCopy({ copyPaths, distPath })();
 
       expect(gulp.src).toHaveBeenCalledTimes(1);
       expect(gulp.dest).toHaveBeenCalledTimes(1);
@@ -228,27 +233,20 @@ describe('@messageflow/build', () => {
         isProd: true,
         rootPath: '.',
       });
-      const nullSrc = builder({
-        src: null,
-      });
-      const nullDist = builder({
-        dist: null,
-      });
-      const nullIgnores = builder({
-        ignores: null,
-      });
-      const nullIsProd = builder({
-        isProd: null,
-      });
-      const nullRootPath = builder({
-        rootPath: null,
-      });
-      const nullTsconfig = builder({
-        tsconfig: null,
-      });
-      const nullTslintConfig = builder({
-        tsconfig: null,
-      });
+      // @ts-ignore
+      const nullSrc = builder({ src: null });
+      // @ts-ignore
+      const nullDist = builder({ dist: null });
+      // @ts-ignore
+      const nullIgnores = builder({ ignores: null });
+      // @ts-ignore
+      const nullIsProd = builder({ isProd: null });
+      // @ts-ignore
+      const nullRootPath = builder({ rootPath: null });
+      // @ts-ignore
+      const nullTsconfig = builder({ tsconfig: null });
+      // @ts-ignore
+      const nullTslintConfig = builder({ tslintConfig: null });
       const allBuilders = [
         d,
         nullSrc,
@@ -266,8 +264,6 @@ describe('@messageflow/build', () => {
       expect(gulp.src).toHaveBeenLastCalledWith([
         `${src}/**/*.ts*`,
         '!**/*.d.ts',
-        '!**/demo*/**/*.ts*',
-        '!**/test*/**/*.ts*',
       ], { since: 'gulp.lastRun' });
       expect(allBuilders)
         .toEqual(
@@ -290,6 +286,7 @@ describe('@messageflow/build', () => {
     test('[function builder] works with opts[ignores] string', () => {
       const d = builder({
         ignores: 'demo*',
+        isProd: true, // isProd is needed to ignore files/ folders
       });
 
       expect(gulp.src).toHaveBeenCalledTimes(3);
@@ -311,6 +308,7 @@ describe('@messageflow/build', () => {
     test('[function builder] works with opts[ignores] array', () => {
       const d = builder({
         ignores: ['demo*', 'test*'],
+        isProd: true, // isProd is needed to ignore files/ folders
       });
 
       expect(gulp.src).toHaveBeenCalledTimes(3);
@@ -331,16 +329,13 @@ describe('@messageflow/build', () => {
     });
 
     test('[function builder] works with null', () => {
-      const d = builder({
-        ignores: ['demo*', 'test*'],
-      });
+      // @ts-ignore
+      const d = builder(null);
 
       expect(gulp.src).toHaveBeenCalledTimes(3);
       expect(gulp.src).toHaveBeenCalledWith([
         'src/**/*.ts*',
         '!**/*.d.ts',
-        '!demo*/**/*.ts*',
-        '!test*/**/*.ts*',
       ], { since: 'gulp.lastRun' });
       expect(d).toEqual({
         clean: expect.any(Function),
@@ -359,8 +354,6 @@ describe('@messageflow/build', () => {
       expect(gulp.src).toHaveBeenCalledWith([
         'src/**/*.ts*',
         '!**/*.d.ts',
-        '!**/demo*/**/*.ts*',
-        '!**/test*/**/*.ts*',
       ], { since: 'gulp.lastRun' });
       expect(d).toEqual({
         clean: expect.any(Function),
@@ -382,8 +375,6 @@ describe('@messageflow/build', () => {
       expect(gulp.src).toHaveBeenCalledWith([
         'src/**/*.ts*',
         '!**/*.d.ts',
-        '!**/demo*/**/*.ts*',
-        '!**/test*/**/*.ts*',
       ], { since: 'gulp.lastRun' });
       expect(del).toHaveBeenCalledWith([
         './*.js',
@@ -423,6 +414,22 @@ describe('@messageflow/build', () => {
       expect(gulpBabel).toHaveBeenCalledWith(babelConfig);
     });
 
+    test('[function builder] works with opts[copies] array', () => {
+      const copies = ['**/src/**/*.*', '!**/src/**.ts*', '**/src/**/*.d.ts'];
+      builder({ copies });
+
+      expect(gulp.src).toHaveBeenCalledTimes(3);
+      expect(gulp.src).toHaveBeenCalledWith(copies, { since: 'gulp.lastRun' });
+    });
+
+    test('[function builder] works with opts[copies] string', () => {
+      const copies = '**/src/**/*.*, !**/src/**.ts*, **/src/**/*.d.ts';
+      builder({ copies });
+
+      expect(gulp.src).toHaveBeenCalledTimes(3);
+      expect(gulp.src).toHaveBeenCalledWith(copies, { since: 'gulp.lastRun' });
+    });
+
     test('[function toProdPath] works', () => {
       expect(toProdPath('./babelrc.json')).toEqual('./babelrc.prod.json');
     });
@@ -436,31 +443,27 @@ describe('@messageflow/build', () => {
     });
 
     test('[function runCopy] throws', () => {
-      expect(() => runCopy(null)())
-        .toThrowError(
-          'Cannot destructure property `srcPath` of \'undefined\' or \'null\''
-        );
+      // @ts-ignore
+      expect(() => runCopy(undefined)())
+      .toThrowError(
+        'Cannot destructure property `copyPaths` of \'undefined\' or \'null\''
+      );
     });
 
     test('[function toProdPath] throws', () => {
+      // @ts-ignore
       expect(() => toProdPath(null))
-        .toThrowError(
-          'Cannot read property \'replace\' of null'
-        );
+      .toThrowError(
+        'Cannot read property \'replace\' of null'
+      );
     });
 
     test('[function linterConfig] throws', () => {
+      // @ts-ignore
       expect(() => linterConfig(null))
-        .toThrowError(
-          'Cannot destructure property `tslintConfig` of \'undefined\' or \'null\''
-        );
-    });
-
-    test('[function builder] throws', () => {
-      expect(() => builder(null))
-        .toThrowError(
-          'Cannot destructure property `src` of \'undefined\' or \'null\''
-        );
+      .toThrowError(
+        'Cannot destructure property `tslintConfig` of \'undefined\' or \'null\''
+      );
     });
 
   });
