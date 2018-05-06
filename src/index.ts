@@ -13,14 +13,14 @@ export declare interface RunWatchParams {
 export declare interface RunTypeScriptParams {
   srcPath: string;
   distPath: string;
-  ignores: string[];
+  ignoreGlobs: string[];
   isProd: boolean;
   babelConfig?: any;
   tsconfig: string;
 }
 export declare interface RunLintParams {
   srcPath: string;
-  ignores: string[];
+  ignoreGlobs: string[];
   tsconfig: string;
   tslintConfig: string;
 }
@@ -35,9 +35,9 @@ export declare interface LinterConfigParams {
 export declare interface BuilderParams {
   src?: string;
   dist?: string;
-  ignores?: string | string[];
-  copies?: string | string[];
   cleanGlobs?: string | string[];
+  copyGlobs?: string | string[];
+  ignoreGlobs?: string | string[];
 
   isProd?: boolean;
   rootPath?: string;
@@ -56,9 +56,9 @@ import gulpTs from 'gulp-typescript';
 import path from 'path';
 import { Linter } from 'tslint';
 
-export const DEFAULT_IGNORES = [
-  '**/demo*',
-  '**/test*',
+export const DEFAULT_IGNORE_GLOBS = [
+  '!**/demo*/**/*.ts*',
+  '!**/test*/**/*.ts*',
 ];
 export const DEFAULT_BABEL_CONFIG = {
   presets: [
@@ -77,6 +77,14 @@ export const DEFAULT_BABEL_CONFIG = {
     }],
   ],
 };
+
+export function toArrayGlobs(globs: string, name: string) {
+  if (typeof globs !== 'string' || !globs.length) {
+    throw new TypeError(`Param \`${name}\` is not a string`);
+  }
+
+  return globs.split(/\s*,\s*/gi);
+}
 
 export function toProdPath(srcPath: string) {
   return srcPath.replace(/^(.+)(\.json)$/, '$1.prod$2');
@@ -113,7 +121,7 @@ export function runCopy({
 
 export function runLint({
   srcPath,
-  ignores,
+  ignoreGlobs,
   tsconfig,
   tslintConfig,
 }: RunLintParams) {
@@ -122,8 +130,8 @@ export function runLint({
       `${srcPath}/**/*.ts*`,
       '!**/*.d.ts',
       ...(
-        Array.isArray(ignores) && ignores.length > 0
-          ? ignores.map(n => `!${n}/**/*.ts*`)
+        Array.isArray(ignoreGlobs) && ignoreGlobs.length > 0
+          ? ignoreGlobs
           : []
       ),
     ], {
@@ -140,7 +148,7 @@ export function runLint({
 export function runTypeScript({
   srcPath,
   distPath,
-  ignores,
+  ignoreGlobs,
   isProd,
   babelConfig,
   tsconfig,
@@ -152,7 +160,11 @@ export function runTypeScript({
     ], { restore: true });
     const src = [
       `${srcPath}/**/*.ts*`,
-      ...ignores.map(n => `!${n}/**/*.ts*`),
+      ...(
+        Array.isArray(ignoreGlobs) && ignoreGlobs.length > 0
+          ? ignoreGlobs
+          : []
+      ),
     ];
 
     return isProd
@@ -203,9 +215,9 @@ export function builder(options = {} as BuilderParams) {
   const {
     src,
     dist,
-    ignores,
-    copies,
     cleanGlobs,
+    copyGlobs,
+    ignoreGlobs,
 
     isProd,
     rootPath,
@@ -215,16 +227,20 @@ export function builder(options = {} as BuilderParams) {
   } = options || {} as BuilderParams;
   const srcPath = src == null ? 'src' : src;
   const distPath = dist == null ? 'dist' : dist;
-  const nIgnores = ignores == null
-    ? DEFAULT_IGNORES
-    : (Array.isArray(ignores) ? ignores : [ignores]);
-  const copyPaths = copies == null
+  const nIgnores = ignoreGlobs == null
+    ? DEFAULT_IGNORE_GLOBS
+    : (
+      Array.isArray(ignoreGlobs)
+        ? ignoreGlobs
+        : toArrayGlobs(ignoreGlobs, 'options[ignoreGlobs]')
+    );
+  const copyPaths = copyGlobs == null
     ? [
       `${srcPath}/**/*.*`,
       `!${srcPath}/**/*.ts*`,
       `${srcPath}/**/*.d.ts`,
     ]
-    : copies;
+    : copyGlobs;
   const isProdFlag = isProd == null ? process.env.NODE_ENV === 'production' : isProd;
   const nRootPath = rootPath == null ? '.' : rootPath;
   const resolvedTsconfig = tsconfig == null ? './tsconfig.json' : tsconfig;
@@ -237,7 +253,7 @@ export function builder(options = {} as BuilderParams) {
   });
   const lint = runLint({
     srcPath,
-    ignores: isProd ? nIgnores : [],
+    ignoreGlobs: isProd ? nIgnores : [],
     tsconfig: resolvedTsconfig,
     tslintConfig: path.join(
       nRootPath,
@@ -248,7 +264,7 @@ export function builder(options = {} as BuilderParams) {
     srcPath,
     distPath,
     babelConfig,
-    ignores: isProd ? nIgnores : [],
+    ignoreGlobs: isProd ? nIgnores : [],
     tsconfig: resolvedTsconfig,
     isProd: isProdFlag,
   });

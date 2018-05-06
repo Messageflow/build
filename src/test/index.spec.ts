@@ -19,6 +19,7 @@ import {
   runTypeScript,
   runWatch,
   toProdPath,
+  toArrayGlobs,
 } from '../';
 
 /**
@@ -124,13 +125,16 @@ describe('@messageflow/build', () => {
 
     test('[function runLint] works', () => {
       const srcPath = 'src';
-      const ignores = ['demo*', 'test*'];
+      const ignoreGlobs = [
+        '!**/demo*/**/*.ts*',
+        '!**/test*/**/*.ts*',
+      ];
       const tslintConfig = '/.tmp/tslint.json';
       const tsconfig = '/.tmp/tsconfig.json';
 
       runLint({
         srcPath,
-        ignores,
+        ignoreGlobs,
         tsconfig,
         tslintConfig,
       })();
@@ -142,8 +146,8 @@ describe('@messageflow/build', () => {
       expect(gulp.src).toHaveBeenCalledWith([
         `${srcPath}/**/*.ts*`,
         '!**/*.d.ts',
-        '!demo*/**/*.ts*',
-        '!test*/**/*.ts*',
+        '!**/demo*/**/*.ts*',
+        '!**/test*/**/*.ts*',
       ], { since: 'gulp.lastRun' });
       expect(gulpTslint).toHaveBeenCalledWith({
         configuration: tslintConfig,
@@ -156,13 +160,16 @@ describe('@messageflow/build', () => {
     test('[function runTypeScript] works', () => {
       const srcPath = 'src';
       const distPath = 'dist';
-      const ignores = ['demo*', 'test*'];
+      const ignoreGlobs = [
+        '!**/demo*/**/*.ts*',
+        '!**/test*/**/*.ts*',
+      ];
       const tsconfig = './tsconfig.json';
 
       runTypeScript({
         srcPath,
         distPath,
-        ignores,
+        ignoreGlobs,
         tsconfig,
         isProd: false,
       })();
@@ -172,8 +179,8 @@ describe('@messageflow/build', () => {
       expect(gulp.dest).toHaveBeenCalledTimes(1);
       expect(gulp.src).toHaveBeenCalledWith([
         `${srcPath}/**/*.ts*`,
-        '!demo*/**/*.ts*',
-        '!test*/**/*.ts*',
+        '!**/demo*/**/*.ts*',
+        '!**/test*/**/*.ts*',
       ]);
       expect(gulpTs.createProject).toHaveBeenCalledWith(tsconfig);
       expect(gulp.dest).toHaveBeenCalledWith(distPath);
@@ -238,7 +245,7 @@ describe('@messageflow/build', () => {
       // @ts-ignore
       const nullDist = builder({ dist: null });
       // @ts-ignore
-      const nullIgnores = builder({ ignores: null });
+      const nullIgnores = builder({ ignoreGlobs: null });
       // @ts-ignore
       const nullIsProd = builder({ isProd: null });
       // @ts-ignore
@@ -283,9 +290,9 @@ describe('@messageflow/build', () => {
         );
     });
 
-    test('[function builder] works with opts[ignores] string', () => {
+    test('[function builder] works with opts[ignoreGlobs] string', () => {
       const d = builder({
-        ignores: 'demo*',
+        ignoreGlobs: '!**/demo*/**/*.ts*, !**/test*/**/*.ts*',
         isProd: true, // isProd is needed to ignore files/ folders
       });
 
@@ -293,7 +300,8 @@ describe('@messageflow/build', () => {
       expect(gulp.src).toHaveBeenCalledWith([
         'src/**/*.ts*',
         '!**/*.d.ts',
-        '!demo*/**/*.ts*',
+        '!**/demo*/**/*.ts*',
+        '!**/test*/**/*.ts*',
       ], { since: 'gulp.lastRun' });
       expect(d).toEqual({
         clean: expect.any(Function),
@@ -305,9 +313,12 @@ describe('@messageflow/build', () => {
       });
     });
 
-    test('[function builder] works with opts[ignores] array', () => {
+    test('[function builder] works with opts[ignoreGlobs] array', () => {
       const d = builder({
-        ignores: ['demo*', 'test*'],
+        ignoreGlobs: [
+          '!**/demo*/**/*.ts*',
+          '!**/test*/**/*.ts*',
+        ],
         isProd: true, // isProd is needed to ignore files/ folders
       });
 
@@ -315,8 +326,8 @@ describe('@messageflow/build', () => {
       expect(gulp.src).toHaveBeenCalledWith([
         'src/**/*.ts*',
         '!**/*.d.ts',
-        '!demo*/**/*.ts*',
-        '!test*/**/*.ts*',
+        '!**/demo*/**/*.ts*',
+        '!**/test*/**/*.ts*',
       ], { since: 'gulp.lastRun' });
       expect(d).toEqual({
         clean: expect.any(Function),
@@ -414,20 +425,20 @@ describe('@messageflow/build', () => {
       expect(gulpBabel).toHaveBeenCalledWith(babelConfig);
     });
 
-    test('[function builder] works with opts[copies] array', () => {
-      const copies = ['**/src/**/*.*', '!**/src/**.ts*', '**/src/**/*.d.ts'];
-      builder({ copies });
+    test('[function builder] works with opts[copyGlobs] array', () => {
+      const copyGlobs = ['**/src/**/*.*', '!**/src/**.ts*', '**/src/**/*.d.ts'];
+      builder({ copyGlobs });
 
       expect(gulp.src).toHaveBeenCalledTimes(3);
-      expect(gulp.src).toHaveBeenCalledWith(copies, { since: 'gulp.lastRun' });
+      expect(gulp.src).toHaveBeenCalledWith(copyGlobs, { since: 'gulp.lastRun' });
     });
 
-    test('[function builder] works with opts[copies] string', () => {
-      const copies = '**/src/**/*.*, !**/src/**.ts*, **/src/**/*.d.ts';
-      builder({ copies });
+    test('[function builder] works with opts[copyGlobs] string', () => {
+      const copyGlobs = '**/src/**/*.*, !**/src/**.ts*, **/src/**/*.d.ts';
+      builder({ copyGlobs });
 
       expect(gulp.src).toHaveBeenCalledTimes(3);
-      expect(gulp.src).toHaveBeenCalledWith(copies, { since: 'gulp.lastRun' });
+      expect(gulp.src).toHaveBeenCalledWith(copyGlobs, { since: 'gulp.lastRun' });
     });
 
     test('[function toProdPath] works', () => {
@@ -445,25 +456,36 @@ describe('@messageflow/build', () => {
     test('[function runCopy] throws', () => {
       // @ts-ignore
       expect(() => runCopy(undefined)())
-      .toThrowError(
-        'Cannot destructure property `copyPaths` of \'undefined\' or \'null\''
-      );
+        .toThrowError(
+          'Cannot destructure property `copyPaths` of \'undefined\' or \'null\''
+        );
     });
 
     test('[function toProdPath] throws', () => {
       // @ts-ignore
       expect(() => toProdPath(null))
-      .toThrowError(
-        'Cannot read property \'replace\' of null'
-      );
+        .toThrowError(
+          'Cannot read property \'replace\' of null'
+        );
     });
 
     test('[function linterConfig] throws', () => {
       // @ts-ignore
       expect(() => linterConfig(null))
-      .toThrowError(
-        'Cannot destructure property `tslintConfig` of \'undefined\' or \'null\''
-      );
+        .toThrowError(
+          'Cannot destructure property `tslintConfig` of \'undefined\' or \'null\''
+        );
+    });
+
+    test('[function toArrayGlobs] throws', () => {
+      try {
+        // @ts-ignore
+        toArrayGlobs(null, 'options[ignoreGlobs]')
+      } catch (e) {
+        expect(e).toEqual(
+          new TypeError('Param `options[ignoreGlobs]` is not a string')
+        );
+      }
     });
 
   });

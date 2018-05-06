@@ -33,7 +33,7 @@
   - [Usage](#usage)
     - [gulpfile.js](#gulpfilejs)
 - [API Reference](#api-reference)
-  - [DEFAULT_IGNORES](#default_ignores)
+  - [DEFAULT_IGNORE_GLOBS](#default_ignore_globs)
   - [DEFAULT_BABEL_CONFIG](#default_babel_config)
   - [BuilderParams](#builderparams)
   - [builder([options])](#builderoptions)
@@ -87,8 +87,8 @@ gulp.task('default', build.default);
 
 ```js
 [
-  '**/demo*',
-  '**/test*',
+  '!**/demo*/**/*.ts*',
+  '!**/test*/**/*.ts*',
 ]
 ```
 
@@ -118,9 +118,9 @@ gulp.task('default', build.default);
 
 - `src` <[?string][string-mdn-url]> Optional source directory. Defaults to `src`.
 - `dist` <[?string][string-mdn-url]> Optional destination directory. Defaults to `dist`.
-- `ignores` <[?string][string-mdn-url]|[string][string-mdn-url][]> Optional glob patterns to ignore files/ directories. Defaults to [DEFAULT_IGNORES][default-ignores-url]. **_This only works when `isProd` is set to true._**
-- `copies` <[?string][string-mdn-url]|[string][string-mdn-url][]> Optional glob patterns to copy files/ directories to destination build directory. Defaults to `['<SRC>/**/*.*', '!<SRC>/**/*.ts*', '<SRC>/**/*.d.ts']`.
 - `cleanGlobs` <[?string][string-mdn-url]|[string][string-mdn-url][]> Optional glob patterns to clean files/ directories up before every build process initiates. **_This is required only when the destination directory is not the `dist` directory._** Defaults to the value of `dist` if unspecified.
+- `copyGlobs` <[?string][string-mdn-url]|[string][string-mdn-url][]> Optional glob patterns to copy files/ directories to destination build directory. Defaults to `['<SRC>/**/*.*', '!<SRC>/**/*.ts*', '<SRC>/**/*.d.ts']`.
+- `ignoreGlobs` <[?string][string-mdn-url]|[string][string-mdn-url][]> Optional glob patterns to ignore files/ directories. Defaults to [DEFAULT_IGNORE_GLOBS][default-ignore-globs-url]. **_This only works when `isProd` is set to true._**
 - `isProd` <[?boolean][boolean-mdn-url]> Optional production flage. Set to `true` if the build process is meant for production. Defaults to `process.env.NODE_ENV === 'production'`.
 - `rootPath` <[?string][string-mdn-url]> Optional path to current working directory. Defaults to `.`.
 - `babelConfig` <[?Object][object-mdn-url]> Optional configuration for [Babel][babel-url]. **_This is only needed when `isProd` is set to true._** Defaults to [DEFAULT_BABEL_CONFIG][default-babel-config-url].
@@ -154,7 +154,7 @@ ___
 [babel-url]: https://github.com/babel/babel
 
 [builderparams-url]: #builderparams
-[default-ignores-url]: #default_ignores
+[default-ignore-globs-url]: #default_ignore_globs
 [default-babel-config-url]: #default_babel_config
 
 [array-mdn-url]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array
