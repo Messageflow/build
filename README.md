@@ -83,7 +83,7 @@ gulp.task('default', build.default);
 
 ## API Reference
 
-### DEFAULT_IGNORES
+### DEFAULT_IGNORE_GLOBS
 
 ```js
 [
