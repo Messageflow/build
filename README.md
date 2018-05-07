@@ -184,7 +184,7 @@ ___
 [coveralls-badge]: https://coveralls.io/repos/github/Messageflow/build/badge.svg?branch=master&style=flat-square
 
 [codebeat-badge]: https://codebeat.co/badges/ca230cdd-bdc5-4f9e-bd39-7b62d47f5fef?style=flat-square
-[codacy-badge]: https://api.codacy.com/project/badge/Grade/ef8c3a98c9e649d19a67ae78f980748a?style=flat-square
+[codacy-badge]: https://api.codacy.com/project/badge/Grade/ef8c3a98c9e649d19a67ae78f980748a
 
 <!-- Links -->
 [nodei-url]: https://nodei.co/npm/@messageflow/build
@@ -202,4 +202,4 @@ ___
 [coveralls-url]: https://coveralls.io/github/Messageflow/build?branch=master
 
 [codebeat-url]: https://codebeat.co/projects/github-com-messageflow-build-master
-[codacy-url]: https://www.codacy.com/app/motss/build?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Messageflow/build&amp;utm_campaign=Badge_Grade
+[codacy-url]: https://www.codacy.com/app/Messageflow/build?utm_source=github.com&amp;utm_medium=referral&amp;utm_content=Messageflow/build&amp;utm_campaign=Badge_Grade
