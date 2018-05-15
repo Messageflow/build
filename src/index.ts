@@ -17,6 +17,7 @@ export declare interface RunTypeScriptParams {
   isProd: boolean;
   babelConfig?: any;
   tsconfig: string;
+  esModules?: boolean;
 }
 export declare interface RunLintParams {
   srcPath: string;
@@ -44,6 +45,8 @@ export declare interface BuilderParams {
   babelConfig?: any;
   tsconfig?: string;
   tslintConfig?: string;
+
+  esModules?: boolean;
 }
 
 /** Import project dependencies */
@@ -66,6 +69,23 @@ export const DEFAULT_BABEL_CONFIG = {
       targets: { node: 'current' },
       spec: true,
       modules: false,
+      useBuiltIns: 'usage',
+      shippedProposals: true,
+    }],
+    ['minify', {
+      replace: false,
+      mangle: { keepFnName: true },
+      removeConsole: false,
+      removeDebugger: true,
+    }],
+  ],
+};
+export const DEFAULT_ESM_BABEL_CONFIG = {
+  presets: [
+    ['@babel/preset-env', {
+      targets: { node: 'current' },
+      spec: true,
+      modules: true,
       useBuiltIns: 'usage',
       shippedProposals: true,
     }],
@@ -152,6 +172,7 @@ export function runTypeScript({
   isProd,
   babelConfig,
   tsconfig,
+  esModules,
 }: RunTypeScriptParams) {
   return function ts() {
     const filterFn = filter([
@@ -166,16 +187,20 @@ export function runTypeScript({
           : []
       ),
     ];
+    const cfg = babelConfig == null
+      ? DEFAULT_BABEL_CONFIG
+      : babelConfig;
+
+    /** NOTE: Set modules=true for ESM */
+    if (esModules) {
+      cfg.presets[0][1].modules = true;
+    }
 
     return isProd
       ? gulp.src(src, { since: gulp.lastRun(ts) })
           .pipe(gulpTs.createProject(tsconfig)())
           .pipe(filterFn)
-          .pipe(gulpBabel(
-            babelConfig == null
-              ? DEFAULT_BABEL_CONFIG
-              : babelConfig
-          ))
+          .pipe(gulpBabel(cfg))
           .pipe(filterFn.restore)
           .pipe(gulp.dest(distPath))
       : gulp.src(src)
@@ -224,6 +249,8 @@ export function builder(options = {} as BuilderParams) {
     babelConfig,
     tsconfig,
     tslintConfig,
+
+    esModules,
   } = options || {} as BuilderParams;
   const srcPath = src == null ? 'src' : src;
   const distPath = dist == null ? 'dist' : dist;
@@ -267,6 +294,9 @@ export function builder(options = {} as BuilderParams) {
     ignoreGlobs: isProd ? nIgnores : [],
     tsconfig: resolvedTsconfig,
     isProd: isProdFlag,
+    esModules: typeof esModules === 'boolean' && esModules
+      ? true
+      : false,
   });
   const defaultTask = runDefault({
     tsTask: ts,
