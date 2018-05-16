@@ -1,5 +1,9 @@
 // @ts-check
 
+export type Omit<T, U> = Pick<T, Exclude<keyof T, U>>;
+export declare interface RunDefaultOssParams extends Omit<RunDefaultParams, 'tsTask'> {
+  ossTask: () => any;
+}
 export declare interface RunDefaultParams {
   cleanTask: () => Promise<string[]>;
   lintTask: () => any;
@@ -54,6 +58,8 @@ import del from 'del';
 import gulp from 'gulp';
 import gulpBabel from 'gulp-babel';
 import filter from 'gulp-filter';
+import gulpIf from 'gulp-if';
+import gulpRename from 'gulp-rename';
 import gulpTslint from 'gulp-tslint';
 import gulpTs from 'gulp-typescript';
 import path from 'path';
@@ -209,6 +215,50 @@ export function runTypeScript({
   };
 }
 
+export function runOss({
+  srcPath,
+  distPath,
+  ignoreGlobs,
+  isProd,
+  babelConfig,
+  tsconfig,
+}: Omit<RunTypeScriptParams, 'esModules'>) {
+  return function oss() {
+    const src = [
+      `${srcPath}/**/*.ts*`,
+      ...(
+        Array.isArray(ignoreGlobs) && ignoreGlobs.length > 0
+        ? ignoreGlobs
+        : []
+      ),
+    ];
+    const filterFn = filter([
+      '**',
+      '!**/*.d.ts',
+    ], { restore: true });
+    const cfg = babelConfig == null
+      ? DEFAULT_BABEL_CONFIG
+      : babelConfig;
+    const compileFn = esm => isProd
+      ? gulp.src(src, { since: gulp.lastRun(oss) })
+        .pipe(gulpTs.createProject(tsconfig)())
+        .pipe(filterFn)
+        .pipe(gulpBabel(cfg))
+        .pipe(filterFn.restore)
+        .pipe(gulpIf(esm), gulpRename({ extname: '.mjs' }))
+        .pipe(gulp.dest(distPath))
+      : gulp.src(src)
+        .pipe(gulpTs.createProject(tsconfig)())
+        .pipe(gulpIf(esm), gulpRename({ extname: '.mjs' }))
+        .pipe(gulp.dest(distPath));
+
+    return gulp.parallel(...[
+      compileFn(true),
+      compileFn(false),
+    ]);
+  };
+}
+
 export function runWatch({
   srcPath,
   defaultTask,
@@ -236,6 +286,22 @@ export function runDefault({
   ]);
 }
 
+export function runDefaultOss({
+  cleanTask,
+  lintTask,
+  copyTask,
+  ossTask,
+}: RunDefaultOssParams) {
+  return gulp.series(...[
+    cleanTask,
+    lintTask,
+    gulp.parallel(...[
+      copyTask,
+      ossTask,
+    ]),
+  ]);
+}
+
 export function builder(options = {} as BuilderParams) {
   const {
     src,
@@ -250,7 +316,7 @@ export function builder(options = {} as BuilderParams) {
     tsconfig,
     tslintConfig,
 
-    esModules,
+    esModules = false,
   } = options || {} as BuilderParams;
   const srcPath = src == null ? 'src' : src;
   const distPath = dist == null ? 'dist' : dist;
@@ -298,8 +364,22 @@ export function builder(options = {} as BuilderParams) {
       ? true
       : false,
   });
+  const oss = runOss({
+    srcPath,
+    distPath,
+    babelConfig,
+    ignoreGlobs: isProd ? nIgnores : [],
+    tsconfig: resolvedTsconfig,
+    isProd: isProdFlag,
+  });
   const defaultTask = runDefault({
     tsTask: ts,
+    cleanTask: clean,
+    copyTask: copy,
+    lintTask: lint,
+  });
+  const defaultOssTask = runDefaultOss({
+    ossTask: oss,
     cleanTask: clean,
     copyTask: copy,
     lintTask: lint,
@@ -315,6 +395,7 @@ export function builder(options = {} as BuilderParams) {
       srcPath,
     }),
     default: defaultTask,
+    oss: defaultOssTask,
   };
 }
 
