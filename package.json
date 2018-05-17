@@ -29,7 +29,7 @@
     "index.js",
     "index.mjs"
   ],
-  "main": "./index.js",
+  "main": "index",
   "repository": {
     "type": "git",
     "url": "git@github.com:Messageflow/build.git"

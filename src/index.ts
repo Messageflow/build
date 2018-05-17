@@ -2,7 +2,8 @@
 
 export type Omit<T, U> = Pick<T, Exclude<keyof T, U>>;
 export declare interface RunDefaultOssParams extends Omit<RunDefaultParams, 'tsTask'> {
-  ossTask: () => any;
+  esmTask: () => any;
+  jsTask: () => any;
 }
 export declare interface RunDefaultParams {
   cleanTask: () => Promise<string[]>;
@@ -22,6 +23,7 @@ export declare interface RunTypeScriptParams {
   babelConfig?: any;
   tsconfig: string;
   esModules?: boolean;
+  mjs?: boolean;
 }
 export declare interface RunLintParams {
   srcPath: string;
@@ -51,6 +53,7 @@ export declare interface BuilderParams {
   tslintConfig?: string;
 
   esModules?: boolean;
+  mjs?: boolean;
 }
 
 /** Import project dependencies */
@@ -75,23 +78,6 @@ export const DEFAULT_BABEL_CONFIG = {
       targets: { node: 'current' },
       spec: true,
       modules: false,
-      useBuiltIns: 'usage',
-      shippedProposals: true,
-    }],
-    ['minify', {
-      replace: false,
-      mangle: { keepFnName: true },
-      removeConsole: false,
-      removeDebugger: true,
-    }],
-  ],
-};
-export const DEFAULT_ESM_BABEL_CONFIG = {
-  presets: [
-    ['@babel/preset-env', {
-      targets: { node: 'current' },
-      spec: true,
-      modules: true,
       useBuiltIns: 'usage',
       shippedProposals: true,
     }],
@@ -179,6 +165,7 @@ export function runTypeScript({
   babelConfig,
   tsconfig,
   esModules,
+  mjs,
 }: RunTypeScriptParams) {
   return function ts() {
     const filterFn = filter([
@@ -194,59 +181,21 @@ export function runTypeScript({
       ),
     ];
     const cfg = babelConfig == null
-      ? DEFAULT_BABEL_CONFIG
+      ? JSON.parse(JSON.stringify(DEFAULT_BABEL_CONFIG))
       : babelConfig;
 
     /** NOTE: Set modules=true for ESM */
-    if (esModules) {
-      cfg.presets[0][1].modules = true;
+    if (!esModules && !mjs) {
+      cfg.presets[0][1].modules = 'commonjs';
     }
 
     return gulp.src(src, { since: gulp.lastRun(ts) })
       .pipe(gulpTs.createProject(tsconfig)())
       .pipe(gulpIf(isProd, filterFn))
       .pipe(gulpIf(isProd, gulpBabel(cfg)))
+      .pipe(gulpIf(typeof mjs === 'boolean' && mjs, gulpRename({ extname: '.mjs' })))
       .pipe(gulpIf(isProd, filterFn.restore))
       .pipe(gulp.dest(distPath));
-  };
-}
-
-export function runOss({
-  srcPath,
-  distPath,
-  ignoreGlobs,
-  isProd,
-  babelConfig,
-  tsconfig,
-}: Omit<RunTypeScriptParams, 'esModules'>) {
-  return function oss() {
-    const src = [
-      `${srcPath}/**/*.ts*`,
-      ...(
-        Array.isArray(ignoreGlobs) && ignoreGlobs.length > 0
-        ? ignoreGlobs
-        : []
-      ),
-    ];
-    const filterFn = filter([
-      '**',
-      '!**/*.d.ts',
-    ], { restore: true });
-    const cfg = babelConfig == null
-      ? DEFAULT_BABEL_CONFIG
-      : babelConfig;
-    const compileFn = esm => gulp.src(src, { since: gulp.lastRun(oss) })
-      .pipe(gulpTs.createProject(tsconfig)())
-      .pipe(gulpIf(isProd, filterFn))
-      .pipe(gulpIf(isProd, gulpBabel(cfg)))
-      .pipe(gulpIf(isProd, filterFn.restore))
-      .pipe(gulpIf(esm, gulpRename({ extname: '.mjs' })))
-      .pipe(gulp.dest(distPath));
-
-    return gulp.parallel(...[
-      compileFn(true),
-      compileFn(false),
-    ]);
   };
 }
 
@@ -281,14 +230,16 @@ export function runDefaultOss({
   cleanTask,
   lintTask,
   copyTask,
-  ossTask,
+  esmTask,
+  jsTask,
 }: RunDefaultOssParams) {
   return gulp.series(...[
     cleanTask,
     lintTask,
+    jsTask,
     gulp.parallel(...[
       copyTask,
-      ossTask,
+      esmTask,
     ]),
   ]);
 }
@@ -307,7 +258,8 @@ export function builder(options = {} as BuilderParams) {
     tsconfig,
     tslintConfig,
 
-    esModules = false,
+    esModules = true,
+    mjs = false,
   } = options || {} as BuilderParams;
   const srcPath = src == null ? 'src' : src;
   const distPath = dist == null ? 'dist' : dist;
@@ -348,20 +300,13 @@ export function builder(options = {} as BuilderParams) {
     srcPath,
     distPath,
     babelConfig,
+    mjs,
     ignoreGlobs: isProd ? nIgnores : [],
     tsconfig: resolvedTsconfig,
     isProd: isProdFlag,
     esModules: typeof esModules === 'boolean' && esModules
       ? true
       : false,
-  });
-  const oss = runOss({
-    srcPath,
-    distPath,
-    babelConfig,
-    ignoreGlobs: isProd ? nIgnores : [],
-    tsconfig: resolvedTsconfig,
-    isProd: isProdFlag,
   });
   const defaultTask = runDefault({
     tsTask: ts,
@@ -370,7 +315,26 @@ export function builder(options = {} as BuilderParams) {
     lintTask: lint,
   });
   const defaultOssTask = runDefaultOss({
-    ossTask: oss,
+    esmTask: runTypeScript({
+      srcPath,
+      distPath,
+      babelConfig,
+      mjs: true,
+      ignoreGlobs: isProd ? nIgnores : [],
+      tsconfig: resolvedTsconfig,
+      isProd: isProdFlag,
+      esModules: true,
+    }),
+    jsTask: runTypeScript({
+      srcPath,
+      distPath,
+      babelConfig,
+      mjs: false,
+      ignoreGlobs: isProd ? nIgnores : [],
+      tsconfig: resolvedTsconfig,
+      isProd: isProdFlag,
+      esModules: false,
+    }),
     cleanTask: clean,
     copyTask: copy,
     lintTask: lint,

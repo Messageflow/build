@@ -20,6 +20,7 @@ node_modules/
 *.js
 *.jsx
 *.d.ts*
+index.mjs
 
 # Do not ignore
 !**/json.d.ts

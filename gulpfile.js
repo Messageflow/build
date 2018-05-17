@@ -5,6 +5,8 @@ const del = require('del');
 const gulp = require('gulp');
 const gulpBabel = require('gulp-babel');
 const gulpFilter = require('gulp-filter');
+const gulpIf = require('gulp-if');
+const gulpRename = require('gulp-rename');
 const gulpTslint = require('gulp-tslint').default;
 const gulpTs = require('gulp-typescript');
 const { Linter } = require('tslint');
@@ -16,6 +18,46 @@ const ignores = ['**/demo*', '**/test*'];
 const isProd = process.env.NODE_ENV === 'production';
 const tslintConfig = `./tslint${isProd ? '.prod' : ''}.json`;
 const tsconfig = './tsconfig.json';
+const compile = (esm) => {
+  const filterFn = gulpFilter([
+    '**',
+    '!**/*.d.ts',
+  ], { restore: true });
+  const src = [
+    `${srcPath}/**/*.ts*`,
+    '!**/*.d.ts',
+    ...ignores.map(n => `!${n}/**/*.ts*`),
+  ];
+
+  return gulp.src(src, { since: gulp.lastRun(compile) })
+    .pipe(gulpTs.createProject(tsconfig)())
+    .pipe(filterFn)
+    // @ts-ignore
+    .pipe(gulpBabel({
+      presets: [
+        ['@babel/preset-env', {
+          targets: { node: 'current' },
+          spec: true,
+          modules: esm ? false : 'commonjs',
+          useBuiltIns: 'usage',
+          shippedProposals: true,
+        }],
+        ...(
+          isProd
+            ? [['minify', {
+              mangle: { keepFnName: true },
+              deadcode: { keepFnName: true },
+              removeConsole: false,
+              removeDebugger: true,
+            }]]
+            : []
+        ),
+      ],
+    }))
+    .pipe(gulpIf(esm, gulpRename({ extname: '.mjs' })))
+    .pipe(filterFn.restore)
+    .pipe(gulp.dest(distPath));
+}
 
 gulp.task('clean', () => {
   return del([
@@ -41,52 +83,11 @@ gulp.task('lint', function lint() {
     .pipe(gulpTslint.report());
 });
 
-gulp.task('ts', function compile() {
-  const filterFn = gulpFilter([
-    '**',
-    '!**/*.d.ts',
-  ], { restore: true });
-  const src = [
-    `${srcPath}/**/*.ts*`,
-    '!**/*.d.ts',
-    ...ignores.map(n => `!${n}/**/*.ts*`),
-  ];
-
-  return isProd
-    ? gulp.src(src, { since: gulp.lastRun(compile) })
-        .pipe(gulpTs.createProject(tsconfig)())
-        .pipe(filterFn)
-        // @ts-ignore
-        .pipe(gulpBabel({
-          presets: [
-            ['@babel/preset-env', {
-              targets: { node: 'current' },
-              spec: true,
-              modules: false,
-              useBuiltIns: 'usage',
-              shippedProposals: true,
-            }],
-            ...(
-              isProd
-                ? [['minify', {
-                  mangle: { keepFnName: true },
-                  deadcode: { keepFnName: true },
-                  removeConsole: false,
-                  removeDebugger: true,
-                }]]
-                : []
-            ),
-          ],
-        }))
-        .pipe(filterFn.restore)
-        .pipe(gulp.dest(distPath))
-    : gulp.src(src)
-        .pipe(gulpTs.createProject(tsconfig)())
-        .pipe(gulp.dest(distPath));
-});
+gulp.task('esm', function esm() { return compile(true); });
+gulp.task('js', function js() { return compile(false); });
 
 gulp.task('default', gulp.series(...[
   'clean',
   'lint',
-  'ts',
+  gulp.parallel('esm', 'js'),
 ]));
