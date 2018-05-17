@@ -202,16 +202,12 @@ export function runTypeScript({
       cfg.presets[0][1].modules = true;
     }
 
-    return isProd
-      ? gulp.src(src, { since: gulp.lastRun(ts) })
-          .pipe(gulpTs.createProject(tsconfig)())
-          .pipe(filterFn)
-          .pipe(gulpBabel(cfg))
-          .pipe(filterFn.restore)
-          .pipe(gulp.dest(distPath))
-      : gulp.src(src)
-          .pipe(gulpTs.createProject(tsconfig)())
-          .pipe(gulp.dest(distPath));
+    return gulp.src(src, { since: gulp.lastRun(ts) })
+      .pipe(gulpTs.createProject(tsconfig)())
+      .pipe(gulpIf(isProd, filterFn))
+      .pipe(gulpIf(isProd, gulpBabel(cfg)))
+      .pipe(gulpIf(isProd, filterFn.restore))
+      .pipe(gulp.dest(distPath));
   };
 }
 
@@ -239,18 +235,13 @@ export function runOss({
     const cfg = babelConfig == null
       ? DEFAULT_BABEL_CONFIG
       : babelConfig;
-    const compileFn = esm => isProd
-      ? gulp.src(src, { since: gulp.lastRun(oss) })
-        .pipe(gulpTs.createProject(tsconfig)())
-        .pipe(filterFn)
-        .pipe(gulpBabel(cfg))
-        .pipe(filterFn.restore)
-        .pipe(gulpIf(esm), gulpRename({ extname: '.mjs' }))
-        .pipe(gulp.dest(distPath))
-      : gulp.src(src)
-        .pipe(gulpTs.createProject(tsconfig)())
-        .pipe(gulpIf(esm), gulpRename({ extname: '.mjs' }))
-        .pipe(gulp.dest(distPath));
+    const compileFn = esm => gulp.src(src, { since: gulp.lastRun(oss) })
+      .pipe(gulpTs.createProject(tsconfig)())
+      .pipe(gulpIf(isProd, filterFn))
+      .pipe(gulpIf(isProd, gulpBabel(cfg)))
+      .pipe(gulpIf(isProd, filterFn.restore))
+      .pipe(gulpIf(esm, gulpRename({ extname: '.mjs' })))
+      .pipe(gulp.dest(distPath));
 
     return gulp.parallel(...[
       compileFn(true),
