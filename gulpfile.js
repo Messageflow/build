@@ -61,9 +61,10 @@ const compile = (esm) => {
 
 gulp.task('clean', () => {
   return del([
-    '*.js',
-    '*.d.ts',
-    '!gulpfile.js',
+    './*.@(mj|j)s',
+    './*.d.ts',
+    '!./gulpfile.js',
+    '!./json.d.ts',
   ]);
 });
 
