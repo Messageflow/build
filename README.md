@@ -23,7 +23,7 @@
 [![codebeat-badge]][codebeat-url]
 [![codacy-badge]][codacy-url]
 
-> Better build process with [Gulp][gulp-url] for general [Node.js][node-js-url] projects written in [TypeScript][typescript-url].
+> Better build process with [Gulp][gulp-url] for general [Node.js][node-js-url] projects written in [TypeScript][typescript-url]. To embrace native ES modules in [Node.js][node-js-url], `@messageflow/build` allows you to build with compiling to any other module system such as `CommonJS` and also allows you to output files in the format of `.mjs`. See the [Using .mjs in Node.js][using-mjs-in-node-js] section to learn how to use `.mjs` in Node.js.
 
 ## Table of contents
 
@@ -32,9 +32,13 @@
   - [Install](#install)
   - [Usage](#usage)
     - [gulpfile.js](#gulpfilejs)
+    - [How to build for FOSS](#how-to-build-for-foss)
+    - [Using .mjs in Node.js](#using-mjs-in-nodejs)
 - [API Reference](#api-reference)
+  - [DEFAULT_FOSS_CLEAN_GLOBS](#default_foss_clean_globs)
   - [DEFAULT_IGNORE_GLOBS](#default_ignore_globs)
   - [DEFAULT_BABEL_CONFIG](#default_babel_config)
+  - [Default FOSS configuration](#default-foss-configuration)
   - [BuilderParams](#builderparams)
   - [builder([options])](#builderoptions)
 - [License](#license)
@@ -78,10 +82,55 @@ gulp.task('lint', build.lint);
 gulp.task('copy', build.copy);
 gulp.task('ts', build.ts);
 gulp.task('watch', build.watch);
-gulp.task('default', build.default);
+gulp.task('default', build.default); // or gulp.task('default', build.all);
+```
+
+#### How to build for FOSS
+
+```js
+// gulpfile.js
+
+const gulp = require('gulp');
+const builder = require('@messageflow/build').builder({ foss: true });
+/** This is equivalent to */
+// const builder = require('@messageflow/build').builder({
+//   dist: '.',
+//   cleanGlobs: [
+//     './*@(mj|j)s',
+//     './*.d.ts',
+//     '!./gulpfile.js',
+//     '!./json.d.ts',
+//   ],
+// })
+
+gulp.task('lint', builder.lint);
+gulp.task('default', builder.all);
+```
+
+#### Using .mjs in Node.js
+
+[Node.js][node-js-url] will import the correct dependencies based on the file extension you use. `.mjs` file will only import `.mjs` files.
+
+```js
+// main.mjs
+import otherMod from './other-mod'; // This will import 'other-mod.mjs` but not 'other-mod.js'
+
+// main.js
+const otherMod = require('./other-mod'); // This will import 'other-mod.js' but not 'other-mod.mjs'
 ```
 
 ## API Reference
+
+### DEFAULT_FOSS_CLEAN_GLOBS
+
+```js
+[
+  './*.@(mj|j)s',
+  './*.d.ts',
+  '!./gulpfile.js',
+  '!./json.d.ts',
+]
+```
 
 ### DEFAULT_IGNORE_GLOBS
 
@@ -114,6 +163,13 @@ gulp.task('default', build.default);
 }
 ```
 
+### Default FOSS configuration
+
+When `foss` is set to true, the following flags will be set to use its default values:
+
+1. `dist` - `.`
+2. `cleanGlobs` - [DEFAULT_FOSS_CLEAN_GLOBS][default-foss-clean-globs-url]
+
 ### BuilderParams
 
 - `src` <[?string][string-mdn-url]> Optional source directory. Defaults to `src`.
@@ -126,6 +182,9 @@ gulp.task('default', build.default);
 - `babelConfig` <[?Object][object-mdn-url]> Optional configuration for [Babel][babel-url]. **_This is only needed when `isProd` is set to true._** Defaults to [DEFAULT_BABEL_CONFIG][default-babel-config-url].
 - `tsConfig` <[?string][string-mdn-url]> Optional path to `tsconfig.json`. Defaults to `./tsconfig.json`.
 - `tslintConfig` <[?string][string-mdn-url]> Optional path to `tslint.json`. Defaults to `./tslint.json`. **_This defaults to `./tslint.prod.json` when `isProd` is set to true._**
+- `esModules` <[?boolean][boolean-mdn-url]> Optional ES modules flag to run compilation with native ES Modules. Defaults to `true`.
+- `mjs` <[?boolean][boolean-mdn-url]> Optional flag to run compilation with native ES modules and output files in the format of `.mjs`. Defaults to `false`. **_Native ES modules will be used and will ignore any value set by `esModules` if this is set to true_**
+- `foss` <[?boolean][boolean-mdn-url]> Optional flag to run compilation for [FOSS][foss-url]. Defaults to `false`. See [Default FOSS configuration][default-foss-configuration-url] to see what is being used under the hood.
 
 ___
 
@@ -140,6 +199,7 @@ ___
   4. `copy` - Copy all asset files such as `images`, `json`, `md`, etc.
   5. `watch` - Run the build process by watching for flle changes.
   6. `default` - Default build process that comprises all the above.
+  7. `all` - Another default build process to compile and output in both `.js` and `.mjs`. See the [How to build for FOSS][how-to-build-for-foss-url] section to learn how to use `@messageflow/build` to build your open source [Node.js][node-js-url] package using the `{ foss: true }` shorthand.
 
 ## License
 
@@ -152,10 +212,15 @@ ___
 [node-releases-url]: https://nodejs.org/en/download/releases
 [gulp-url]: https://github.com/gulpjs/gulp
 [babel-url]: https://github.com/babel/babel
+[foss-url]: https://en.oxforddictionaries.com/definition/foss
 
 [builderparams-url]: #builderparams
 [default-ignore-globs-url]: #default_ignore_globs
 [default-babel-config-url]: #default_babel_config
+[default-foss-clean-globs-url]: #default_foss_clean_globs
+[default-foss-configuration-url]: #default-foss-configuration
+[using-mjs-in-node-js]: #using-mjs-in-node-js
+[how-to-build-for-foss-url]: #how-to-build-for-foss
 
 [array-mdn-url]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array
 [boolean-mdn-url]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean

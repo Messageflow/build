@@ -1,7 +1,7 @@
 // @ts-check
 
 export type Omit<T, U> = Pick<T, Exclude<keyof T, U>>;
-export declare interface RunDefaultOssParams extends Omit<RunDefaultParams, 'tsTask'> {
+export declare interface RunAllParams extends Omit<RunDefaultParams, 'tsTask'> {
   esmTask: () => any;
   jsTask: () => any;
 }
@@ -233,13 +233,13 @@ export function runDefault({
   ]);
 }
 
-export function runDefaultOss({
+export function runAll({
   cleanTask,
   lintTask,
   copyTask,
   esmTask,
   jsTask,
-}: RunDefaultOssParams) {
+}: RunAllParams) {
   return gulp.series(...[
     cleanTask,
     lintTask,
@@ -333,7 +333,7 @@ export function builder(options = {} as BuilderParams) {
     copyTask: copy,
     lintTask: lint,
   });
-  const defaultOssTask = runDefaultOss({
+  const allTask = runAll({
     esmTask: runTypeScript({
       srcPath,
       distPath,
@@ -369,7 +369,7 @@ export function builder(options = {} as BuilderParams) {
       srcPath,
     }),
     default: defaultTask,
-    oss: defaultOssTask,
+    all: allTask,
   };
 }
 
