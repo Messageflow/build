@@ -23,7 +23,7 @@
 [![codebeat-badge]][codebeat-url]
 [![codacy-badge]][codacy-url]
 
-> Better build process with [Gulp][gulp-url] for general [Node.js][node-js-url] projects written in [TypeScript][typescript-url]. To embrace native ES modules in [Node.js][node-js-url], `@messageflow/build` allows you to build with compiling to any other module system such as `CommonJS` and also allows you to output files in the format of `.mjs`. See the [Using .mjs in Node.js][using-mjs-in-node-js] section to learn how to use `.mjs` in Node.js.
+> Better build process with [Gulp][gulp-url] for general [Node.js][node-js-url] projects written in [TypeScript][typescript-url]. To embrace native ES modules in [Node.js][node-js-url], `@messageflow/build` allows you to build with compiling to any other module system such as `CommonJS` and also allows you to output files in the format of `.mjs`. See the [Using .mjs in Node.js][using-mjs-in-nodejs-url] section to learn how to use `.mjs` in Node.js.
 
 ## Table of contents
 
@@ -219,7 +219,7 @@ ___
 [default-babel-config-url]: #default_babel_config
 [default-foss-clean-globs-url]: #default_foss_clean_globs
 [default-foss-configuration-url]: #default-foss-configuration
-[using-mjs-in-node-js]: #using-mjs-in-node-js
+[using-mjs-in-nodejs-url]: #using-mjs-in-nodejs
 [how-to-build-for-foss-url]: #how-to-build-for-foss
 
 [array-mdn-url]: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array
