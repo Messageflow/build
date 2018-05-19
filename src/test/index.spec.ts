@@ -462,7 +462,7 @@ describe('@messageflow/build', () => {
               mangle: { keepFnName: true },
               removeConsole: false,
               removeDebugger: true,
-              replace: false
+              replace: false,
             }]
           ],
         }
