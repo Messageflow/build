@@ -54,6 +54,7 @@ export declare interface BuilderParams {
 
   esModules?: boolean;
   mjs?: boolean;
+  foss?: boolean;
 }
 
 /** Import project dependencies */
@@ -89,6 +90,12 @@ export const DEFAULT_BABEL_CONFIG = {
     }],
   ],
 };
+export const DEFAULT_FOSS_CLEAN_GLOBS = [
+  './*.@(mj|j)s',
+  './*.d.ts',
+  '!./gulpfile.js',
+  '!./json.d.ts',
+];
 
 export function toArrayGlobs(globs: string, name: string) {
   if (typeof globs !== 'string' || !globs.length) {
@@ -260,9 +267,15 @@ export function builder(options = {} as BuilderParams) {
 
     esModules = true,
     mjs = false,
+    foss = false,
   } = options || {} as BuilderParams;
+  const isFoss = typeof foss === 'boolean' && foss;
   const srcPath = src == null ? 'src' : src;
-  const distPath = dist == null ? 'dist' : dist;
+  const distPath = dist == null
+    ? isFoss
+      ? '.'
+      : 'dist'
+    : dist;
   const nIgnores = ignoreGlobs == null
     ? DEFAULT_IGNORE_GLOBS
     : (
@@ -282,7 +295,13 @@ export function builder(options = {} as BuilderParams) {
   const resolvedTsconfig = tsconfig == null ? './tsconfig.json' : tsconfig;
   const resolvedTslintConfig = tslintConfig == null ? './tslint.json' : tslintConfig;
 
-  const clean = runClean(cleanGlobs == null ? distPath : cleanGlobs);
+  const clean = runClean(
+    cleanGlobs == null
+      ? isFoss
+        ? DEFAULT_FOSS_CLEAN_GLOBS
+        : distPath
+      : cleanGlobs
+  );
   const copy = runCopy({
     copyPaths,
     distPath,

@@ -11,6 +11,7 @@ import { Linter } from 'tslint';
 /** Import other modules */
 import {
   builder,
+  DEFAULT_FOSS_CLEAN_GLOBS,
   linterConfig,
   runClean,
   runCopy,
@@ -467,6 +468,13 @@ describe('@messageflow/build', () => {
           ],
         }
       );
+    });
+
+    test('[function builder] works with opts[foss] set to true', () => {
+      builder({ foss: true });
+
+      expect(gulp.dest).toHaveBeenLastCalledWith('.');
+      expect(del).toHaveBeenLastCalledWith(DEFAULT_FOSS_CLEAN_GLOBS);
     });
 
   });
