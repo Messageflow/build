@@ -45,8 +45,8 @@
     "test": "jest --config ./.jestrc.json"
   },
   "dependencies": {
-    "@babel/core": "^7.0.0-beta.47",
-    "@babel/preset-env": "^7.0.0-beta.47",
+    "@babel/core": "^7.0.0-beta.48",
+    "@babel/preset-env": "^7.0.0-beta.48",
     "babel-preset-minify": "^0.4.3",
     "del": "^3.0.0",
     "gulp": "^4.0.0",
@@ -66,8 +66,8 @@
     "@types/node": "^10.1.2",
     "@types/vinyl": "^2.0.2",
     "babel-preset-env": "^1.7.0",
-    "cross-env": "^5.1.5",
-    "jest": "^22.4.4",
+    "cross-env": "^5.1.6",
+    "jest": "^23.0.0",
     "nsp": "^3.2.1",
     "ts-jest": "^22.4.6"
   },
